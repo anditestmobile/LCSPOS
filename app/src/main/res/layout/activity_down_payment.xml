@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.PaymentActivity">
+
+    <LinearLayout
+        android:id="@+id/linearLayout4"
+        android:layout_width="1100dp"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimaryDark"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryDark"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:text="Total Amount Due + GST"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <id.co.lcs.pos.utils.KeyboardLessEdittext
+                android:id="@+id/edtTotAmount"
+                style="@style/Widget.AppCompat.EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/edt_background"
+                android:backgroundTint="@color/white"
+                android:ems="10"
+                android:enabled="false"
+                android:gravity="center"
+                android:hint="Total Amount Due + GST"
+                android:inputType="number"
+                android:padding="8dp"
+                android:textColor="@drawable/text_disabled_color"
+                android:textSize="30sp" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="20dp"
+                android:text="Amount Paid"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <id.co.lcs.pos.utils.KeyboardLessEdittext
+                android:id="@+id/edtDP"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/edt_background"
+                android:backgroundTint="@color/white"
+                android:ems="10"
+                android:gravity="center"
+                android:hint="Down Payment Paid"
+                android:inputType="number"
+                android:padding="8dp"
+                android:textSize="30sp"
+                android:visibility="gone" />
+
+            <id.co.lcs.pos.utils.KeyboardLessEdittext
+                android:id="@+id/edtAmount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/edt_background"
+                android:backgroundTint="@color/white"
+                android:ems="10"
+                android:enabled="false"
+                android:gravity="center"
+                android:hint="Amount Down Payment"
+                android:inputType="number"
+                android:padding="8dp"
+                android:textColor="@drawable/text_disabled_color"
+                android:textSize="30sp" />
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="20dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnProceed"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:layout_marginTop="10dp"
+                    android:padding="10dp"
+                    android:text="Proceed to Receipt"
+                    android:textSize="27dp"
+                    app:cornerRadius="24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/linearLayout6" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDot"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/button_background"
+                    android:fontFamily="sans-serif-light"
+                    android:text="."
+                    android:textColor="@color/black"
+                    android:textSize="30sp"
+                    app:backgroundTint="@null"
+                    app:layout_constraintBottom_toBottomOf="@+id/btnProceed"
+                    app:layout_constraintEnd_toEndOf="@+id/custom_number_pad"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintStart_toStartOf="@+id/guideline5"
+                    app:layout_constraintTop_toBottomOf="@+id/custom_number_pad"
+                    app:layout_constraintVertical_bias="0.0" />
+
+                <cat.xojan.numpad.NumPadView
+                    android:id="@+id/custom_number_pad"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginLeft="10dp"
+                    app:button0_background="@drawable/button_background"
+                    app:button1_background="@drawable/button_background"
+                    app:button2_background="@drawable/button_background"
+                    app:button3_background="@drawable/button_background"
+                    app:button4_background="@drawable/button_background"
+                    app:button5_background="@drawable/button_background"
+                    app:button6_background="@drawable/button_background"
+                    app:button7_background="@drawable/button_background"
+                    app:button8_background="@drawable/button_background"
+                    app:button9_background="@drawable/button_background"
+                    app:custom_button1_background="@drawable/button_del_background"
+                    app:custom_button1_text="DEL"
+                    app:custom_button2_background="@drawable/button_ok_background"
+                    app:custom_button2_text="OK"
+                    app:fontFamily="sans-serif-light"
+                    app:horizontalSeparatorMargin="12dp"
+                    app:layout_constraintBottom_toTopOf="@+id/btnProceed"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintStart_toStartOf="@+id/guideline5"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="1.0"
+                    app:textBold="false"
+                    app:textColor="@android:color/black"
+                    app:textSize="30sp"
+                    app:verticalSeparatorMargin="12dp">
+
+                </cat.xojan.numpad.NumPadView>
+
+                <LinearLayout
+                    android:id="@+id/linearLayout2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:orientation="vertical"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/textView11"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="3"
+                        android:padding="8dp"
+                        android:text="Credit Card"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <id.co.lcs.pos.utils.KeyboardLessEdittext
+                        android:id="@+id/ccRefNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edt_background"
+                        android:backgroundTint="@color/white"
+                        android:gravity="center_vertical"
+                        android:hint="@string/credit_card_number"
+                        android:padding="8dp"
+                        android:textSize="30sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <id.co.lcs.pos.utils.KeyboardLessEdittext
+                            android:id="@+id/cardNumber"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="50"
+                            android:layout_marginRight="5dp"
+                            android:background="@drawable/edt_background"
+                            android:backgroundTint="@color/white"
+                            android:gravity="center_vertical"
+                            android:hint="Card Number"
+                            android:padding="8dp"
+                            android:textSize="30sp" />
+                        <id.co.lcs.pos.utils.KeyboardLessEdittext
+                            android:id="@+id/ccMonth"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="22"
+                            android:layout_marginLeft="5dp"
+                            android:enabled="false"
+                            android:background="@drawable/edt_background"
+                            android:backgroundTint="@color/white"
+                            android:gravity="center_vertical"
+                            android:hint="Month"
+                            android:padding="8dp"
+                            android:textSize="30sp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="6"
+                            android:textColor="@color/white"
+                            android:gravity="center"
+                            android:textSize="30sp"
+                            android:text="/"/>
+
+                        <id.co.lcs.pos.utils.KeyboardLessEdittext
+                            android:id="@+id/ccYear"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="22"
+                            android:layout_marginLeft="5dp"
+                            android:enabled="false"
+                            android:background="@drawable/edt_background"
+                            android:backgroundTint="@color/white"
+                            android:gravity="center_vertical"
+                            android:hint="Year"
+                            android:padding="8dp"
+                            android:textSize="30sp" />
+                    </LinearLayout>
+
+                    <id.co.lcs.pos.utils.KeyboardLessEdittext
+                        android:id="@+id/cc_amount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edt_background"
+                        android:backgroundTint="@color/white"
+                        android:layout_marginTop="10dp"
+                        android:enabled="false"
+                        android:gravity="center_vertical"
+                        android:hint="@string/cc_amount"
+                        android:padding="8dp"
+                        android:textSize="30sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linearLayout3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+
+                    <TextView
+                        android:id="@+id/textView13"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="3"
+                        android:padding="8dp"
+                        android:text="Nets"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <id.co.lcs.pos.utils.KeyboardLessEdittext
+                        android:id="@+id/edtNetsRef"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edt_background"
+                        android:backgroundTint="@color/white"
+                        android:gravity="center_vertical"
+                        android:hint="@string/credit_card_number"
+                        android:inputType="number"
+                        android:padding="8dp"
+                        android:textSize="30sp" />
+                    <id.co.lcs.pos.utils.KeyboardLessEdittext
+                        android:id="@+id/edtNetsAmount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edt_background"
+                        android:backgroundTint="@color/white"
+                        android:gravity="center_vertical"
+                        android:hint="@string/nets_amount"
+                        android:inputType="number"
+                        android:layout_marginTop="10dp"
+                        android:padding="8dp"
+                        android:textSize="30sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linearLayout6"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/linearLayout3">
+
+                    <TextView
+                        android:id="@+id/textView12"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="Cash"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <id.co.lcs.pos.utils.KeyboardLessEdittext
+                        android:id="@+id/edtCash"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edt_background"
+                        android:backgroundTint="@color/white"
+                        android:gravity="center_vertical"
+                        android:hint="@string/cash"
+                        android:inputType="number"
+                        android:padding="8dp"
+                        android:textSize="30sp" />
+                </LinearLayout>
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.5" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+    </LinearLayout>
+    <ImageView
+        android:id="@+id/imgBack"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        app:layout_constraintStart_toStartOf="@+id/linearLayout4"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_back" />
+</androidx.constraintlayout.widget.ConstraintLayout>

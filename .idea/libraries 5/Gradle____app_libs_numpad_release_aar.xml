@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: ./app/libs/numpad-release.aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a018ba386e4f36fb7c7efac76e580f2f/jetified-numpad-release/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a018ba386e4f36fb7c7efac76e580f2f/jetified-numpad-release/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a018ba386e4f36fb7c7efac76e580f2f/jetified-numpad-release/AndroidManifest.xml" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
