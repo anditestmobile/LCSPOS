@@ -33,12 +33,106 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.DataObjectHold
 
     class DataObjectHolder extends RecyclerView.ViewHolder {
         private RowViewMainBinding binding;
-
+        final Handler handler = new Handler();
         DataObjectHolder(RowViewMainBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
+            binding.txtDisc.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    if(editable.toString().isEmpty() || editable.toString().trim().equals("-")){
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                binding.txtDisc.setText(String.valueOf(dataList.get((Integer)binding.txtDisc.getTag()).getDisc()));
+                            }
+                        }, 3000);
+                    }else{
+                        if (binding.spinner.getSelectedItemPosition() == 0) {
+                            double disc = Double.parseDouble(String.format("%.2f", dataList.get((Integer) binding.txtDisc.getTag()).getPrice()
+                                    * (Double.parseDouble(editable.toString()) / 100)));
+                            double nettPrice = dataList.get((Integer) binding.txtDisc.getTag()).getNettPrice();
+                            if (Double.parseDouble(String.format("%.2f", dataList.get((Integer) binding.txtDisc.getTag()).getPrice() - disc)) != nettPrice) {
+                                dataList.get((Integer) binding.txtDisc.getTag()).setDisc(Double.parseDouble(editable.toString()));
+                                disc = Double.parseDouble(String.format("%.2f", dataList.get((Integer) binding.txtDisc.getTag()).getPrice()
+                                        * dataList.get((Integer) binding.txtDisc.getTag()).getDisc() / 100));
+                                nettPrice = Double.parseDouble(String.format("%.2f", dataList.get((Integer) binding.txtDisc.getTag()).getPrice() - disc));
+                                dataList.get((Integer) binding.txtDisc.getTag()).setNettPrice(nettPrice);
+
+                                double totPrice = Double.parseDouble(String.format("%.2f", nettPrice
+                                        * Double.parseDouble(dataList.get((Integer) binding.txtDisc.getTag()).getQty())));
+                                dataList.get((Integer) binding.txtDisc.getTag()).setTotPrice(totPrice);
+                                binding.txtTotPrice.setText("S$ " + totPrice);
+                                binding.txtNettPrice.setText(String.valueOf(nettPrice));
+                                mContext.changeQty();
+                            }
+                        }else{
+                            double disc = Double.parseDouble(String.format("%.2f", (Double.parseDouble(editable.toString()))));
+                            double nettPrice = dataList.get((Integer) binding.txtDisc.getTag()).getNettPrice();
+                            if (Double.parseDouble(String.format("%.2f", dataList.get((Integer) binding.txtDisc.getTag()).getPrice() - disc)) != nettPrice) {
+                                dataList.get((Integer) binding.txtDisc.getTag()).setDisc(Double.parseDouble(editable.toString()));
+                                disc = Double.parseDouble(String.format("%.2f", dataList.get((Integer) binding.txtDisc.getTag()).getDisc()));
+                                nettPrice = Double.parseDouble(String.format("%.2f", dataList.get((Integer) binding.txtDisc.getTag()).getPrice() - disc));
+                                dataList.get((Integer) binding.txtDisc.getTag()).setNettPrice(nettPrice);
+
+                                double totPrice = Double.parseDouble(String.format("%.2f", nettPrice
+                                        * Double.parseDouble(dataList.get((Integer) binding.txtDisc.getTag()).getQty())));
+                                dataList.get((Integer) binding.txtDisc.getTag()).setTotPrice(totPrice);
+                                binding.txtTotPrice.setText("S$ " + totPrice);
+                                binding.txtNettPrice.setText(String.valueOf(nettPrice));
+                                mContext.changeQty();
+                            }
+                        }
+                    }
+                }
+            });
+            binding.txtQty.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    if(editable.toString().isEmpty() || editable.toString().equals("0")){
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                binding.txtQty.setText(dataList.get((Integer)binding.txtQty.getTag()).getQty());
+                            }
+                        }, 3000);
+                    }else{
+                        dataList.get((Integer)binding.txtQty.getTag()).setQty(editable.toString());
+                        double disc = dataList.get((Integer)binding.txtQty.getTag()).getPrice()
+                                * dataList.get((Integer)binding.txtQty.getTag()).getDisc()/100;
+                        double nettPrice = Double.parseDouble(String.format("%.2f", dataList.get((Integer)binding.txtQty.getTag()).getPrice() - disc));
+                        dataList.get((Integer)binding.txtDisc.getTag()).setNettPrice(nettPrice);
+                        double totPrice = Double.parseDouble(String.format("%.2f", nettPrice
+                                * Double.parseDouble(dataList.get((Integer)binding.txtQty.getTag()).getQty())));
+                        dataList.get((Integer)binding.txtQty.getTag()).setTotPrice(totPrice);
+                        binding.txtTotPrice.setText("S$ " + totPrice);
+//                    binding.txtNettPrice.setText(String.valueOf(nettPrice));
+                        mContext.changeQty();
+                    }
+                }
+            });
         }
+
 
     }
 
@@ -51,7 +145,8 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.DataObjectHold
     @Override
     public void onBindViewHolder(@NonNull final DataObjectHolder holder, final int position) {
         final QuotationItemResponse data = dataList.get(position);
-        final Handler handler = new Handler();
+        holder.binding.txtQty.setTag(position);
+        holder.binding.txtDisc.setTag(position);
         holder.binding.txtNo.setText(String.valueOf(position+1));
         holder.binding.txtItem.setText(data.getItemCode()+"\n"+data.getDescription());
         holder.binding.txtPrice.setText("S$ " + data.getPrice());
@@ -59,8 +154,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.DataObjectHold
         holder.binding.txtNettPrice.setText(String.valueOf(data.getNettPrice()));
         holder.binding.txtDisc.setText(String.valueOf(data.getDisc()));
         holder.binding.txtQty.setText(data.getQty());
-        holder.binding.txtQty.setTag(position);
-        holder.binding.txtDisc.setTag(position);
+
         holder.binding.txtNettPrice.setTag(position);
 
         holder.binding.spinner.setOnItemSelectedListener(mContext);
@@ -87,101 +181,101 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.DataObjectHold
             }
         });
 
-        holder.binding.txtQty.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//        holder.binding.txtQty.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable editable) {
+//                if(editable.toString().isEmpty() || editable.toString().equals("0")){
+//                    handler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            holder.binding.txtQty.setText(dataList.get((Integer)holder.binding.txtQty.getTag()).getQty());
+//                        }
+//                    }, 3000);
+//                }else{
+//                    dataList.get((Integer)holder.binding.txtQty.getTag()).setQty(editable.toString());
+//                    double disc = dataList.get((Integer)holder.binding.txtQty.getTag()).getPrice()
+//                            * dataList.get((Integer)holder.binding.txtQty.getTag()).getDisc()/100;
+//                    double nettPrice = Double.parseDouble(String.format("%.2f", dataList.get((Integer)holder.binding.txtQty.getTag()).getPrice() - disc));
+//                    dataList.get((Integer)holder.binding.txtDisc.getTag()).setNettPrice(nettPrice);
+//                    double totPrice = Double.parseDouble(String.format("%.2f", nettPrice
+//                            * Double.parseDouble(dataList.get((Integer)holder.binding.txtQty.getTag()).getQty())));
+//                    dataList.get((Integer)holder.binding.txtQty.getTag()).setTotPrice(totPrice);
+//                    holder.binding.txtTotPrice.setText("S$ " + totPrice);
+////                    holder.binding.txtNettPrice.setText(String.valueOf(nettPrice));
+//                    mContext.changeQty();
+//                }
+//            }
+//        });
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if(editable.toString().isEmpty() || editable.toString().equals("0")){
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            holder.binding.txtQty.setText(dataList.get((Integer)holder.binding.txtQty.getTag()).getQty());
-                        }
-                    }, 3000);
-                }else{
-                    dataList.get((Integer)holder.binding.txtQty.getTag()).setQty(editable.toString());
-                    double disc = dataList.get((Integer)holder.binding.txtQty.getTag()).getPrice()
-                            * dataList.get((Integer)holder.binding.txtQty.getTag()).getDisc()/100;
-                    double nettPrice = Double.parseDouble(String.format("%.2f", dataList.get((Integer)holder.binding.txtQty.getTag()).getPrice() - disc));
-                    dataList.get((Integer)holder.binding.txtDisc.getTag()).setNettPrice(nettPrice);
-                    double totPrice = Double.parseDouble(String.format("%.2f", nettPrice
-                            * Double.parseDouble(dataList.get((Integer)holder.binding.txtQty.getTag()).getQty())));
-                    dataList.get((Integer)holder.binding.txtQty.getTag()).setTotPrice(totPrice);
-                    holder.binding.txtTotPrice.setText("S$ " + totPrice);
-//                    holder.binding.txtNettPrice.setText(String.valueOf(nettPrice));
-                    mContext.changeQty();
-                }
-            }
-        });
-
-        holder.binding.txtDisc.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if(editable.toString().isEmpty() || editable.toString().trim().equals("-")){
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            holder.binding.txtDisc.setText(String.valueOf(dataList.get((Integer)holder.binding.txtDisc.getTag()).getDisc()));
-                        }
-                    }, 3000);
-                }else{
-                    if (holder.binding.spinner.getSelectedItemPosition() == 0) {
-                        double disc = Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getPrice()
-                                * (Double.parseDouble(editable.toString()) / 100)));
-                        double nettPrice = dataList.get((Integer) holder.binding.txtDisc.getTag()).getNettPrice();
-                        if (Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getPrice() - disc)) != nettPrice) {
-                            dataList.get((Integer) holder.binding.txtDisc.getTag()).setDisc(Double.parseDouble(editable.toString()));
-                            disc = Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getPrice()
-                                    * dataList.get((Integer) holder.binding.txtDisc.getTag()).getDisc() / 100));
-                            nettPrice = Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getPrice() - disc));
-                            dataList.get((Integer) holder.binding.txtDisc.getTag()).setNettPrice(nettPrice);
-
-                            double totPrice = Double.parseDouble(String.format("%.2f", nettPrice
-                                    * Double.parseDouble(dataList.get((Integer) holder.binding.txtDisc.getTag()).getQty())));
-                            dataList.get((Integer) holder.binding.txtDisc.getTag()).setTotPrice(totPrice);
-                            holder.binding.txtTotPrice.setText("S$ " + totPrice);
-                            holder.binding.txtNettPrice.setText(String.valueOf(nettPrice));
-                            mContext.changeQty();
-                        }
-                    }else{
-                        double disc = Double.parseDouble(String.format("%.2f", (Double.parseDouble(editable.toString()))));
-                        double nettPrice = dataList.get((Integer) holder.binding.txtDisc.getTag()).getNettPrice();
-                        if (Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getPrice() - disc)) != nettPrice) {
-                            dataList.get((Integer) holder.binding.txtDisc.getTag()).setDisc(Double.parseDouble(editable.toString()));
-                            disc = Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getDisc()));
-                            nettPrice = Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getPrice() - disc));
-                            dataList.get((Integer) holder.binding.txtDisc.getTag()).setNettPrice(nettPrice);
-
-                            double totPrice = Double.parseDouble(String.format("%.2f", nettPrice
-                                    * Double.parseDouble(dataList.get((Integer) holder.binding.txtDisc.getTag()).getQty())));
-                            dataList.get((Integer) holder.binding.txtDisc.getTag()).setTotPrice(totPrice);
-                            holder.binding.txtTotPrice.setText("S$ " + totPrice);
-                            holder.binding.txtNettPrice.setText(String.valueOf(nettPrice));
-                            mContext.changeQty();
-                        }
-                    }
-                }
-            }
-        });
+//        holder.binding.txtDisc.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable editable) {
+//                if(editable.toString().isEmpty() || editable.toString().trim().equals("-")){
+//                    handler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            holder.binding.txtDisc.setText(String.valueOf(dataList.get((Integer)holder.binding.txtDisc.getTag()).getDisc()));
+//                        }
+//                    }, 3000);
+//                }else{
+//                    if (holder.binding.spinner.getSelectedItemPosition() == 0) {
+//                        double disc = Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getPrice()
+//                                * (Double.parseDouble(editable.toString()) / 100)));
+//                        double nettPrice = dataList.get((Integer) holder.binding.txtDisc.getTag()).getNettPrice();
+//                        if (Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getPrice() - disc)) != nettPrice) {
+//                            dataList.get((Integer) holder.binding.txtDisc.getTag()).setDisc(Double.parseDouble(editable.toString()));
+//                            disc = Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getPrice()
+//                                    * dataList.get((Integer) holder.binding.txtDisc.getTag()).getDisc() / 100));
+//                            nettPrice = Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getPrice() - disc));
+//                            dataList.get((Integer) holder.binding.txtDisc.getTag()).setNettPrice(nettPrice);
+//
+//                            double totPrice = Double.parseDouble(String.format("%.2f", nettPrice
+//                                    * Double.parseDouble(dataList.get((Integer) holder.binding.txtDisc.getTag()).getQty())));
+//                            dataList.get((Integer) holder.binding.txtDisc.getTag()).setTotPrice(totPrice);
+//                            holder.binding.txtTotPrice.setText("S$ " + totPrice);
+//                            holder.binding.txtNettPrice.setText(String.valueOf(nettPrice));
+//                            mContext.changeQty();
+//                        }
+//                    }else{
+//                        double disc = Double.parseDouble(String.format("%.2f", (Double.parseDouble(editable.toString()))));
+//                        double nettPrice = dataList.get((Integer) holder.binding.txtDisc.getTag()).getNettPrice();
+//                        if (Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getPrice() - disc)) != nettPrice) {
+//                            dataList.get((Integer) holder.binding.txtDisc.getTag()).setDisc(Double.parseDouble(editable.toString()));
+//                            disc = Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getDisc()));
+//                            nettPrice = Double.parseDouble(String.format("%.2f", dataList.get((Integer) holder.binding.txtDisc.getTag()).getPrice() - disc));
+//                            dataList.get((Integer) holder.binding.txtDisc.getTag()).setNettPrice(nettPrice);
+//
+//                            double totPrice = Double.parseDouble(String.format("%.2f", nettPrice
+//                                    * Double.parseDouble(dataList.get((Integer) holder.binding.txtDisc.getTag()).getQty())));
+//                            dataList.get((Integer) holder.binding.txtDisc.getTag()).setTotPrice(totPrice);
+//                            holder.binding.txtTotPrice.setText("S$ " + totPrice);
+//                            holder.binding.txtNettPrice.setText(String.valueOf(nettPrice));
+//                            mContext.changeQty();
+//                        }
+//                    }
+//                }
+//            }
+//        });
 
 //        holder.binding.txtNettPrice.addTextChangedListener(new TextWatcher() {
 //            @Override
@@ -240,7 +334,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.DataObjectHold
         dataList = filteredList;
         this.notifyDataSetChanged();
     }
-
 
 
 }

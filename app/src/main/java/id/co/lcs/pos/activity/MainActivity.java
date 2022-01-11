@@ -38,6 +38,7 @@ import android.widget.Toast;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static android.view.Window.FEATURE_NO_TITLE;
@@ -59,6 +60,7 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
     private String textCust;
     private int FLAG_CUST = 0;
     private EditText edtScan;
+    private RequestUrl mAsyncTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,9 +82,9 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                 } else {
                     if(binding.txtQuoNo.getText().toString().isEmpty() || binding.txtSONo.getText().toString().isEmpty()){
                         if(binding.txtQuoNo.getText().toString().isEmpty()){
-                            Helper.setItemParam(Constants.SO_FLAG, false);
-                        }else{
                             Helper.setItemParam(Constants.SO_FLAG, true);
+                        }else{
+                            Helper.setItemParam(Constants.SO_FLAG, false);
                         }
                     }else{
                         Helper.setItemParam(Constants.SO_FLAG, false);
@@ -111,7 +113,7 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                     }else{
                         payment.setQuoNo(binding.txtSONo.getText().toString());
                     }
-                    payment.setDocDate("2021-05-26");
+                    payment.setDocDate("2021-07-26");
                     listPaymentItem = new ArrayList<>();
                     for (QuotationItemResponse temp : listQIR) {
                         PaymentItem paymentItem = new PaymentItem();
@@ -178,7 +180,7 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                     }else{
                         payment.setQuoNo(binding.txtSONo.getText().toString());
                     }
-                    payment.setDocDate("2021-05-26");
+                    payment.setDocDate("2021-07-26");
                     listPaymentItem = new ArrayList<>();
                     for (QuotationItemResponse temp : listQIR) {
                         PaymentItem paymentItem = new PaymentItem();
@@ -292,7 +294,7 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                                         binding.txtDisc.setText("");
                                         binding.spinner.setSelection(0);
                                         PARAM = 0;
-                                        new RequestUrl().execute();
+                                        callASyncTask();
                                         getProgressDialog().show();
                                     }
                                 })
@@ -304,7 +306,7 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                                 .show();
                     } else {
                         PARAM = 0;
-                        new RequestUrl().execute();
+                        callASyncTask();
                         getProgressDialog().show();
                     }
                 }
@@ -335,7 +337,7 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                                         binding.txtDisc.setText("");
                                         binding.spinner.setSelection(0);
                                         PARAM = 3;
-                                        new RequestUrl().execute();
+                                        callASyncTask();
                                         getProgressDialog().show();
                                     }
                                 })
@@ -347,8 +349,10 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                                 .show();
                     } else {
                         PARAM = 3;
-                        new RequestUrl().execute();
+                        callASyncTask();
                         getProgressDialog().show();
+//                        new RequestUrl().execute();
+//                        getProgressDialog().show();
                     }
                 }
             }
@@ -417,7 +421,7 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                     binding.txtCustCode.setText("");
                     textCust = editable.toString();
                     PARAM = 2;
-                    new RequestUrl().execute();
+                    callASyncTask();
                 } else {
                     FLAG_CUST = 0;
                 }
@@ -431,12 +435,12 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                     scan = binding.txtItem.getText().toString();
                     if(!binding.txtSONo.getText().toString().isEmpty() || !binding.txtQuoNo.getText().toString().isEmpty()) {
                         PARAM = 1;
-                        new RequestUrl().execute();
+                        callASyncTask();
                         getProgressDialog().show();
                     }else{
                         if(!binding.txtCustCode.getText().toString().isEmpty()){
                             PARAM = 1;
-                            new RequestUrl().execute();
+                            callASyncTask();
                             getProgressDialog().show();
                         }else{
                             setToast("Customer cannot empty");
@@ -473,6 +477,16 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
 
     }
 
+    public void callASyncTask(){
+        if(mAsyncTask != null) {
+            if (mAsyncTask.getStatus().equals(AsyncTask.Status.RUNNING)) {
+                mAsyncTask.cancel(true);
+            }
+        }
+        mAsyncTask = new RequestUrl();
+        mAsyncTask.execute();
+    }
+
     private void openDialogScan() {
         dialog = new Dialog(this);
         dialog.requestWindowFeature(FEATURE_NO_TITLE);
@@ -485,7 +499,7 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                 if (!edtScan.getText().toString().trim().isEmpty()) {
                     scan = edtScan.getText().toString();
                     PARAM = 1;
-                    new RequestUrl().execute();
+                    callASyncTask();
                     getProgressDialog().show();
                 } else {
                     setToast("Item/Barcode cannot empty");
@@ -528,7 +542,7 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                     Helper.removeItemParam(Constants.POS_MENU);
                     Helper.removeItemParam(Constants.BARCODERESULT);
                     PARAM = 0;
-                    new RequestUrl().execute();
+                    callASyncTask();
                     getProgressDialog().show();
 //                    insertDummyData();
                 }
@@ -617,13 +631,28 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                             .concat("\\").concat(textCust);
                     listCust = (Customer[]) Helper.getWebserviceWithoutHeaders(url, Customer[].class);
                     return null;
-                }else{
+                }else if(PARAM == 3){
                     String URL_GET_QUOTATION = Constants.API_PREFIX + Constants.API_GET_ORDER;
 
                     final String url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_GET_QUOTATION)
                             .concat(binding.txtSONo.getText().toString());
 
                     return (QuotationResponse[]) Helper.getWebserviceWithoutHeaders(url, QuotationResponse[].class);
+                }else if(PARAM == 4) {
+                    String url = "";
+                    if (!binding.txtQuoNo.getText().toString().trim().isEmpty()) {
+                        String URL_GET_ITEM = Constants.API_PREFIX + Constants.API_GET_QUOTATION_DETAILS;
+                        url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_GET_ITEM)
+                                .concat(binding.txtQuoNo.getText().toString());
+                    }else{
+                        String URL_GET_ITEM = Constants.API_PREFIX + Constants.API_GET_SALES_ORDER_DETAILS;
+                        url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_GET_ITEM)
+                                .concat(binding.txtSONo.getText().toString());
+                    }
+                    qIR = (QuotationItemResponse[]) Helper.getWebserviceWithoutHeaders(url, QuotationItemResponse[].class);
+                    return null;
+                }else{
+                    return null;
                 }
             } catch (Exception ex) {
                 if (ex.getMessage() != null) {
@@ -643,8 +672,11 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
             if (PARAM == 0) {
                 getProgressDialog().dismiss();
                 if (quotation != null && quotation.length != 0) {
+                    listCust = new Customer[1];
+                    listCust[0] = new Customer(quotation[0].getCustomerCode(), quotation[0].getCustomerName());
                     binding.txtCustName.setText(quotation[0].getCustomerName());
                     binding.txtCustCode.setText(quotation[0].getCustomerCode());
+                    getItem();
                 } else {
                     if (Helper.getItemParam(Constants.INTERNAL_SERVER_ERROR) != null) {
                         Toast.makeText(getApplicationContext(), Helper.getItemParam(Constants.INTERNAL_SERVER_ERROR).toString(), Toast.LENGTH_SHORT).show();
@@ -663,23 +695,38 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                 if (listCust != null && listCust.length != 0) {
                     setCustomer(listCust);
                 } else {
-                    setToast("customer not found");
+//                    setToast("customer not found");
                 }
-            }else{
+            }else if(PARAM == 3){
                 getProgressDialog().dismiss();
                 if (quotation != null && quotation.length != 0) {
+                    listCust = new Customer[1];
+                    listCust[0] = new Customer(quotation[0].getCustomerCode(), quotation[0].getCustomerName());
                     binding.txtCustName.setText(quotation[0].getCustomerName());
                     binding.txtCustCode.setText(quotation[0].getCustomerCode());
+                    getItem();
                 } else {
                     if (Helper.getItemParam(Constants.INTERNAL_SERVER_ERROR) != null) {
                         Toast.makeText(getApplicationContext(), Helper.getItemParam(Constants.INTERNAL_SERVER_ERROR).toString(), Toast.LENGTH_SHORT).show();
                     } else {
+                        progress.dismiss();
                         Toast.makeText(getApplicationContext(), "Data not found", Toast.LENGTH_SHORT).show();
                     }
+                }
+            }else if(PARAM == 4){
+                getProgressDialog().dismiss();
+                if (qIR!=null && qIR.length != 0) {
+                    setDataItem(qIR);
                 }
             }
         }
 
+    }
+
+    private void getItem() {
+        PARAM = 4;
+        callASyncTask();
+        getProgressDialog().show();
     }
 
     private void setCustomer(Customer[] listCust) {
@@ -695,27 +742,18 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
         binding.txtCustName.showDropDown();
     }
 
-    private void setDataItem(QuotationItemResponse[] qIR) {
+    private void setDataItem(QuotationItemResponse[] item) {
 //        binding.txtItem.clearFocus();
-        double disc = qIR[0].getPrice() * qIR[0].getDisc()/100;
-        double nettPrice = qIR[0].getPrice() - disc;
-        double totPrice = nettPrice * Integer.parseInt(qIR[0].getQty());
-        qIR[0].setTotPrice(Double.parseDouble(String.format("%.2f",totPrice)));
-        qIR[0].setNettPrice(Double.parseDouble(String.format("%.2f",nettPrice)));
-        if (listQIR == null) {
-            listQIR = new ArrayList<>();
-            listQIR.add(qIR[0]);
-            adapter = new MainAdapter(MainActivity.this, listQIR);
-            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
-
-            binding.rcItem.setLayoutManager(layoutManager);
-
-            binding.rcItem.setAdapter(adapter);
-        } else {
+        double disc = item[0].getPrice() * item[0].getDisc()/100;
+        double nettPrice = item[0].getPrice() - disc;
+        double totPrice = nettPrice * Integer.parseInt(item[0].getQty());
+        item[0].setTotPrice(Double.parseDouble(String.format("%.2f",totPrice)));
+        item[0].setNettPrice(Double.parseDouble(String.format("%.2f",nettPrice)));
+        if (listQIR != null && listQIR.size() != 0) {
             int FLAG = 0;
             for (QuotationItemResponse temp : listQIR) {
-                if (temp.getItemCode().equals(qIR[0].getItemCode())) {
-                    temp.setQty(String.valueOf(Double.parseDouble(temp.getQty()) + Double.parseDouble(qIR[0].getQty())));
+                if (temp.getItemCode().equals(item[0].getItemCode())) {
+                    temp.setQty(String.valueOf(Double.parseDouble(temp.getQty()) + Double.parseDouble(item[0].getQty())));
                     FLAG = 1;
                     break;
                 } else {
@@ -723,9 +761,27 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                 }
             }
             if (FLAG == 0) {
-                listQIR.add(qIR[0]);
+                listQIR.add(item[0]);
             }
             adapter.filterList(listQIR);
+        } else {
+//            if(listQIR == null) {
+                listQIR = new ArrayList<>();
+                for (QuotationItemResponse q : item) {
+                    listQIR.add(q);
+                }
+                adapter = new MainAdapter(MainActivity.this, listQIR);
+                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
+
+                binding.rcItem.setLayoutManager(layoutManager);
+
+                binding.rcItem.setAdapter(adapter);
+//            }else{
+//                for (QuotationItemResponse q : item) {
+//                    listQIR.add(q);
+//                }
+//                adapter.filterList(listQIR);
+//            }
         }
         countData(listQIR);
 

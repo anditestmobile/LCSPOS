@@ -27,7 +27,7 @@
             tools:ignore="LockedOrientationActivity"></activity>
         <activity android:name=".activity.MainActivity"
             android:screenOrientation="landscape"
-            android:windowSoftInputMode="adjustPan|adjustResize"
+            android:windowSoftInputMode="adjustResize"
             tools:ignore="LockedOrientationActivity"></activity>
         <activity android:name=".activity.ScanActivity"
             android:screenOrientation="landscape"

@@ -20,6 +20,8 @@ public class Constants {
     public static final String API_PREFIX = "/Service/ZEN_IntegrationService.svc\\";
     public static final String API_GET_QUOTATION = "GET_QuotationDocument\\";
     public static final String API_GET_QUOTATION_ITEM = "GET_QuotationDocument_Item\\";
+    public static final String API_GET_QUOTATION_DETAILS = "GET_QuotationDocument_AllItem\\";
+    public static final String API_GET_SALES_ORDER_DETAILS = "GET_OrderDocument_AllItem\\";
     public static final String API_GET_ORDER_ITEM = "GET_OrderDocument_Item\\";
     public static final String API_GET_ORDER = "GET_OrderDocument\\";
     public static final String API_POST_SO_ARINVOICE = "POST_SO_ARInvoice";

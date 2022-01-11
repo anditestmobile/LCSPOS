@@ -13,6 +13,12 @@
     <string name="cc_amount">Key in card amount</string>
     <string name="cash">Key in Cash</string>
     <string name="nets_amount">Key in nets amount</string>
+    <string name="check_amount">Key in check amount</string>
+    <string name="check_account">Key in check account</string>
+    <string name="check_number">Key in Check No.</string>
+    <string name="check_date">Key in Check Date</string>
+    <string name="check_bank">Check Bank</string>
+    <string name="check_country">Check Country</string>
 
 
     <string name="login_msg_empty_username">Please fill the username</string>

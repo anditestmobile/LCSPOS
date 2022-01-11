@@ -11,6 +11,14 @@ public class Customer implements Serializable {
     @SerializedName("CardName")
     private String custName;
 
+    public Customer() {
+    }
+
+    public Customer(String custCode, String custName) {
+        this.custCode = custCode;
+        this.custName = custName;
+    }
+
     public String getCustCode() {
         return custCode;
     }

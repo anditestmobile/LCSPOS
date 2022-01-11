@@ -151,408 +151,403 @@
 
     </LinearLayout>
 
-    <TableLayout
-        android:id="@+id/tableLayout"
+    <ScrollView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:padding="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline2"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:padding="20dp">
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="5dp">
-
-            <TextView
-                android:id="@+id/textView15"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="4.5"
-                android:padding="10dp"
-                android:text="Quotation No"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/txtQuoNo"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@color/white"
-                android:layout_weight="4"
-                android:layout_marginRight="5dp"
-                android:padding="10dp"
-                android:hint="Quotation No."
-                android:inputType="number"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-            <Button
-                android:id="@+id/btnGet"
-                android:layout_width="0dp"
-                android:layout_weight="1.5"
-                android:text="GET"
-                android:layout_height="match_parent"
-                android:textSize="16sp"
-                android:background="@color/white"
-                />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="5dp">
-
-            <TextView
-                android:id="@+id/textView9"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="4.5"
-                android:padding="10dp"
-                android:text="Sales Order No."
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/txtSONo"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@color/white"
-                android:layout_weight="4"
-                android:layout_marginRight="5dp"
-                android:padding="10dp"
-                android:hint="Sales Order No."
-                android:inputType="number"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-            <Button
-                android:id="@+id/btnGet1"
-                android:layout_width="0dp"
-                android:layout_weight="1.5"
-                android:text="GET"
-                android:layout_height="match_parent"
-                android:textSize="16sp"
-                android:background="@color/white"
-                />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="5dp">
-
-            <TextView
-                android:id="@+id/textView8"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:layout_weight="4.5"
-                android:text="Customer Name"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-
-            <AutoCompleteTextView
-                android:id="@+id/txtCustName"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:background="@color/white"
-                android:layout_weight="5.5"
-                android:padding="10dp"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:singleLine="true"
-                android:lines="1"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:hint="Customer name"
-                android:layout_below="@+id/imageView"
-                android:layout_alignLeft="@+id/imageView"
-                android:layout_alignStart="@+id/imageView">
-            </AutoCompleteTextView>
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="5dp">
-
-            <TextView
-                android:id="@+id/textView10"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:text="Customer Code"
-                android:layout_weight="4.5"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/txtCustCode"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@color/white"
-                android:padding="10dp"
-                android:layout_weight="5.5"
-                android:enabled="false"
-                android:hint="Customer code"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-        </TableRow>
-    </TableLayout>
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.41" />
-
-    <RelativeLayout
-        android:id="@+id/relativeLayout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/colorPrimaryDark"
-        android:orientation="horizontal"
-        android:padding="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline3"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/tableLayout"
-        app:layout_constraintTop_toBottomOf="@+id/tableLayout">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnScan"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:padding="10dp"
-            android:text="Input or Scan Items / Barcode"
-            android:textSize="26dp"
-            android:visibility="gone"
-            app:cornerRadius="24dp" />
+            android:orientation="vertical" >
 
-        <EditText
-            android:id="@+id/txtItem"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="5dp"
-            android:layout_toLeftOf="@id/btnGet2"
-            android:background="@color/white"
-            android:hint="Input/Scan Item here"
-            android:inputType="number"
-            android:padding="10dp"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+            <TableLayout
+                android:id="@+id/tableLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/btnGet2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:background="@color/white"
-            android:text="GET"
-            android:textSize="22sp" />
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp">
 
-    </RelativeLayout>
+                    <TextView
+                        android:id="@+id/textView15"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4.5"
+                        android:padding="10dp"
+                        android:text="Quotation No"
+                        android:textColor="@color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
 
-    <TableLayout
-        android:id="@+id/tableLayout1"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:padding="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/relativeLayout1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline2"
-        app:layout_constraintTop_toTopOf="@+id/guideline3">
+                    <EditText
+                        android:id="@+id/txtQuoNo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:layout_weight="4"
+                        android:background="@color/white"
+                        android:hint="Quotation No."
+                        android:inputType="number"
+                        android:padding="10dp"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
 
+                    <Button
+                        android:id="@+id/btnGet"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1.5"
+                        android:background="@color/white"
+                        android:text="GET"
+                        android:textSize="16sp" />
+                </TableRow>
 
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp">
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="5dp">
+                    <TextView
+                        android:id="@+id/textView9"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4.5"
+                        android:padding="10dp"
+                        android:text="Sales Order No."
+                        android:textColor="@color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/textView12"
-                android:layout_width="0dp"
+                    <EditText
+                        android:id="@+id/txtSONo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:layout_weight="4"
+                        android:background="@color/white"
+                        android:hint="Sales Order No."
+                        android:inputType="number"
+                        android:padding="10dp"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btnGet1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1.5"
+                        android:background="@color/white"
+                        android:text="GET"
+                        android:textSize="16sp" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp">
+
+                    <TextView
+                        android:id="@+id/textView8"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4.5"
+                        android:padding="10dp"
+                        android:text="Customer Name"
+                        android:textColor="@color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <AutoCompleteTextView
+                        android:id="@+id/txtCustName"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_below="@+id/imageView"
+                        android:layout_alignStart="@+id/imageView"
+                        android:layout_alignLeft="@+id/imageView"
+                        android:layout_weight="5.5"
+                        android:background="@color/white"
+                        android:ellipsize="end"
+                        android:hint="Customer name"
+                        android:lines="1"
+                        android:maxLines="1"
+                        android:padding="10dp"
+                        android:singleLine="true"
+                        android:textSize="22sp"
+                        android:textStyle="bold"></AutoCompleteTextView>
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp">
+
+                    <TextView
+                        android:id="@+id/textView10"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4.5"
+                        android:padding="10dp"
+                        android:text="Customer Code"
+                        android:textColor="@color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/txtCustCode"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5.5"
+                        android:background="@color/white"
+                        android:enabled="false"
+                        android:hint="Customer code"
+                        android:padding="10dp"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+                </TableRow>
+            </TableLayout>
+
+            <RelativeLayout
+                android:id="@+id/relativeLayout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="4.5"
-                android:padding="10dp"
-                android:text="Subtotal"
-                android:enabled="false"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:background="@color/colorPrimaryDark"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/txtSubtot"
-                android:layout_width="0dp"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnScan"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:padding="10dp"
+                    android:text="Input or Scan Items / Barcode"
+                    android:textSize="26dp"
+                    android:visibility="gone"
+                    app:cornerRadius="24dp" />
+
+                <EditText
+                    android:id="@+id/txtItem"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="5dp"
+                    android:layout_toLeftOf="@id/btnGet2"
+                    android:background="@color/white"
+                    android:hint="Input/Scan Item here"
+                    android:inputType="number"
+                    android:padding="10dp"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btnGet2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@color/white"
+                    android:text="GET"
+                    android:textSize="22sp" />
+
+            </RelativeLayout>
+
+            <TableLayout
+                android:id="@+id/tableLayout1"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="5.5"
-                android:textColor="@color/white"
-                android:textAlignment="textEnd"
-                android:text="S$ 0"
-                android:enabled="false"
-                android:padding="10dp"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-        </TableRow>
+                android:layout_marginTop="20dp">
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="5dp">
 
-            <TextView
-                android:id="@+id/textView11"
-                android:layout_width="0dp"
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp">
+
+                    <TextView
+                        android:id="@+id/textView12"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4.5"
+                        android:enabled="false"
+                        android:padding="10dp"
+                        android:text="Subtotal"
+                        android:textColor="@color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txtSubtot"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5.5"
+                        android:enabled="false"
+                        android:padding="10dp"
+                        android:text="S$ 0"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp">
+
+                    <TextView
+                        android:id="@+id/textView11"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4.5"
+                        android:padding="10dp"
+                        android:text="Total Discount"
+                        android:textColor="@color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+
+                    <Spinner
+                        android:id="@+id/spinner"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:layout_weight="1.5"
+                        android:background="@color/white"
+                        android:textSize="22sp" />
+
+                    <EditText
+                        android:id="@+id/txtDisc"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4"
+                        android:background="@color/white"
+                        android:hint="Disc"
+                        android:inputType="numberDecimal|numberSigned"
+                        android:padding="10dp"
+                        android:textAlignment="textEnd"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp">
+
+                    <TextView
+                        android:id="@+id/textView13"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4.5"
+                        android:padding="10dp"
+                        android:text="Tax Total (GST 7%)"
+                        android:textColor="@color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txtTaxTotal"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5.5"
+                        android:enabled="false"
+                        android:inputType="numberDecimal"
+                        android:padding="10dp"
+                        android:text="S$ 0"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp">
+
+                    <TextView
+                        android:id="@+id/textView14"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4.5"
+                        android:padding="10dp"
+                        android:text="Grand Total"
+                        android:textColor="@color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txtGrandTotal"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5.5"
+                        android:enabled="false"
+                        android:padding="10dp"
+                        android:text="S$ 0"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+                </TableRow>
+            </TableLayout>
+
+            <RelativeLayout
+                android:id="@+id/relativeLayout1"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="4.5"
-                android:padding="10dp"
-                android:text="Total Discount"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:layout_marginTop="20dp"
+                android:background="@color/colorPrimaryDark"
+                android:orientation="horizontal">
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCancel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:backgroundTint="@android:color/holo_red_light"
+                    android:padding="10dp"
+                    android:text="Cancel"
+                    android:textSize="26dp"
+                    app:cornerRadius="24dp" />
 
-            <Spinner
-                android:id="@+id/spinner"
-                android:layout_width="0dp"
-                android:layout_weight="1.5"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
-                android:textSize="22sp"
-                android:background="@color/white"
-                />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnProceed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/btnCancel"
+                    android:layout_margin="10dp"
+                    android:padding="10dp"
+                    android:text="Proceed to payment"
+                    android:textSize="26dp"
+                    app:cornerRadius="24dp" />
 
-            <EditText
-                android:id="@+id/txtDisc"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="4"
-                android:background="@color/white"
-                android:padding="10dp"
-                android:textAlignment="textEnd"
-                android:hint="Disc"
-                android:inputType="numberDecimal|numberSigned"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-        </TableRow>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDownPayment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/btnProceed"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:padding="10dp"
+                    android:text="Proceed to down payment"
+                    android:textSize="26dp"
+                    app:cornerRadius="24dp" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="5dp">
+            </RelativeLayout>
 
-            <TextView
-                android:id="@+id/textView13"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="4.5"
-                android:padding="10dp"
-                android:text="Tax Total (GST 7%)"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txtTaxTotal"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="5.5"
-                android:textColor="@color/white"
-                android:textAlignment="textEnd"
-                android:text="S$ 0"
-                android:padding="10dp"
-                android:enabled="false"
-                android:inputType="numberDecimal"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="5dp">
-
-            <TextView
-                android:id="@+id/textView14"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="4.5"
-                android:padding="10dp"
-                android:text="Grand Total"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txtGrandTotal"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="5.5"
-                android:padding="10dp"
-                android:textColor="@color/white"
-                android:textAlignment="textEnd"
-                android:text="S$ 0"
-                android:enabled="false"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-        </TableRow>
-    </TableLayout>
-
-    <RelativeLayout
-        android:id="@+id/relativeLayout1"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:background="@color/colorPrimaryDark"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="@+id/rcItem"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/tableLayout">
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCancel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:padding="10dp"
-            android:backgroundTint="@android:color/holo_red_light"
-            android:text="Cancel"
-            android:textSize="26dp"
-            app:cornerRadius="24dp"/>
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnProceed"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:padding="10dp"
-            android:text="Proceed to payment"
-            android:layout_below="@+id/btnCancel"
-            android:textSize="26dp"
-            app:cornerRadius="24dp"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnDownPayment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:padding="10dp"
-            android:text="Proceed to down payment"
-            android:layout_below="@+id/btnProceed"
-            android:textSize="26dp"
-            app:cornerRadius="24dp"/>
-
-    </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

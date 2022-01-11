@@ -19,7 +19,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:background="@color/colorPrimaryDark"
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
@@ -117,8 +117,7 @@
                     app:cornerRadius="24dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/guideline5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/linearLayout6" />
+                    app:layout_constraintStart_toStartOf="parent" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnDot"
@@ -174,14 +173,88 @@
                 </cat.xojan.numpad.NumPadView>
 
                 <LinearLayout
-                    android:id="@+id/linearLayout2"
+                    android:id="@+id/lPayment"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginRight="1dp"
+                        android:orientation="vertical">
+
+                        <Button
+                            android:id="@+id/btnCreditCard"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textSize="18sp"
+                            android:padding="10dp"
+                            android:insetTop="1dp"
+                            android:insetBottom="1dp"
+                            android:text="Credit Card" />
+
+                        <Button
+                            android:id="@+id/btnNets"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/btnCreditCard"
+                            android:layout_weight="1"
+                            android:insetTop="1dp"
+                            android:insetBottom="1dp"
+                            android:padding="10dp"
+                            android:textSize="18sp"
+                            android:text="NETS" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="1dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <Button
+                            android:id="@+id/btnCash"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:insetTop="1dp"
+                            android:insetBottom="1dp"
+                            android:padding="10dp"
+                            android:textSize="18sp"
+                            android:text="CASH" />
+
+                        <Button
+                            android:id="@+id/btnCheck"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:insetTop="1dp"
+                            android:insetBottom="1dp"
+                            android:padding="10dp"
+                            android:textSize="18sp"
+                            android:layout_below="@id/btnCash"
+                            android:text="CHECK" />
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/lPCreditCard"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
                     android:orientation="vertical"
+                    app:layout_constraintBottom_toTopOf="@+id/btnProceed"
                     app:layout_constraintEnd_toStartOf="@+id/guideline5"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toBottomOf="@+id/lPayment">
 
                     <TextView
                         android:id="@+id/textView11"
@@ -189,7 +262,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
                         android:padding="8dp"
-                        android:text="Credit Card"
+                        android:text="CREDIT CARD"
                         android:textColor="@color/white"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -203,7 +276,8 @@
                         android:gravity="center_vertical"
                         android:hint="@string/credit_card_number"
                         android:padding="8dp"
-                        android:textSize="30sp" />
+                        android:textSize="30sp"
+                        />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -215,25 +289,27 @@
                             android:id="@+id/cardNumber"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="50"
                             android:layout_marginRight="5dp"
+                            android:layout_weight="50"
                             android:background="@drawable/edt_background"
                             android:backgroundTint="@color/white"
                             android:gravity="center_vertical"
-                            android:hint="Card Number"
+                            android:hint="4 Digit Card No."
+                            android:maxLength="4"
                             android:padding="8dp"
                             android:textSize="30sp" />
+
                         <id.co.lcs.pos.utils.KeyboardLessEdittext
                             android:id="@+id/ccMonth"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="22"
                             android:layout_marginLeft="5dp"
-                            android:enabled="false"
+                            android:layout_weight="22"
                             android:background="@drawable/edt_background"
                             android:backgroundTint="@color/white"
                             android:gravity="center_vertical"
                             android:hint="Month"
+                            android:maxLength="2"
                             android:padding="8dp"
                             android:textSize="30sp" />
 
@@ -241,22 +317,22 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="6"
-                            android:textColor="@color/white"
                             android:gravity="center"
-                            android:textSize="30sp"
-                            android:text="/"/>
+                            android:text="/"
+                            android:textColor="@color/white"
+                            android:textSize="30sp" />
 
                         <id.co.lcs.pos.utils.KeyboardLessEdittext
                             android:id="@+id/ccYear"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="22"
                             android:layout_marginLeft="5dp"
-                            android:enabled="false"
+                            android:layout_weight="22"
                             android:background="@drawable/edt_background"
                             android:backgroundTint="@color/white"
                             android:gravity="center_vertical"
                             android:hint="Year"
+                            android:maxLength="2"
                             android:padding="8dp"
                             android:textSize="30sp" />
                     </LinearLayout>
@@ -265,10 +341,9 @@
                         android:id="@+id/cc_amount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
                         android:background="@drawable/edt_background"
                         android:backgroundTint="@color/white"
-                        android:layout_marginTop="10dp"
-                        android:enabled="false"
                         android:gravity="center_vertical"
                         android:hint="@string/cc_amount"
                         android:padding="8dp"
@@ -276,15 +351,17 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/linearLayout3"
+                    android:id="@+id/lPNets"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toTopOf="@+id/btnProceed"
                     app:layout_constraintEnd_toStartOf="@+id/guideline5"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+                    app:layout_constraintTop_toBottomOf="@+id/lPayment">
 
                     <TextView
                         android:id="@+id/textView13"
@@ -292,7 +369,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
                         android:padding="8dp"
-                        android:text="Nets"
+                        android:text="NETS"
                         android:textColor="@color/white"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -308,37 +385,40 @@
                         android:inputType="number"
                         android:padding="8dp"
                         android:textSize="30sp" />
+
                     <id.co.lcs.pos.utils.KeyboardLessEdittext
                         android:id="@+id/edtNetsAmount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
                         android:background="@drawable/edt_background"
                         android:backgroundTint="@color/white"
                         android:gravity="center_vertical"
                         android:hint="@string/nets_amount"
                         android:inputType="number"
-                        android:layout_marginTop="10dp"
                         android:padding="8dp"
                         android:textSize="30sp" />
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/linearLayout6"
+                    android:id="@+id/lPCash"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toTopOf="@+id/btnProceed"
                     app:layout_constraintEnd_toStartOf="@+id/guideline5"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/linearLayout3">
+                    app:layout_constraintTop_toBottomOf="@+id/lPayment">
 
                     <TextView
                         android:id="@+id/textView12"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="8dp"
-                        android:text="Cash"
+                        android:text="CASH"
                         android:textColor="@color/white"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -356,6 +436,121 @@
                         android:textSize="30sp" />
                 </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/lPCheck"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toTopOf="@+id/btnProceed"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/lPayment">
+
+                    <TextView
+                        android:id="@+id/textView14"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="3"
+                        android:padding="8dp"
+                        android:text="CHECK"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <id.co.lcs.pos.utils.KeyboardLessEdittext
+                        android:id="@+id/edtCheckRef"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edt_background"
+                        android:backgroundTint="@color/white"
+                        android:gravity="center_vertical"
+                        android:hint="@string/check_number"
+                        android:inputType="number"
+                        android:padding="8dp"
+                        android:textSize="30sp" />
+
+                    <id.co.lcs.pos.utils.KeyboardLessEdittext
+                        android:id="@+id/edtCheckAcc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/edt_background"
+                        android:backgroundTint="@color/white"
+                        android:gravity="center_vertical"
+                        android:hint="@string/check_account"
+                        android:inputType="number"
+                        android:padding="8dp"
+                        android:textSize="30sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/edtCheckBank"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/edt_background"
+                            android:backgroundTint="@color/white"
+                            android:layout_weight="5"
+                            android:hint="@string/check_bank"
+                            android:layout_marginTop="10dp"
+                            android:inputType="text"
+                            android:imeOptions="actionNext"
+                            android:padding="8dp"
+                            android:textSize="30sp"
+                            android:layout_marginRight="5dp"/>
+                        <EditText
+                            android:id="@+id/edtCheckCountry"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/edt_background"
+                            android:backgroundTint="@color/white"
+                            android:layout_weight="5"
+                            android:inputType="text"
+                            android:imeOptions="actionNext"
+                            android:hint="@string/check_country"
+                            android:layout_marginTop="10dp"
+                            android:padding="8dp"
+                            android:textSize="30sp"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/edtCheckDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edt_background"
+                        android:backgroundTint="@color/white"
+                        android:clickable="false"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:hint="@string/check_date"
+                        android:layout_marginTop="10dp"
+                        android:padding="8dp"
+                        android:textSize="30sp"/>
+
+                    <id.co.lcs.pos.utils.KeyboardLessEdittext
+                        android:id="@+id/edtCheckAmount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/edt_background"
+                        android:backgroundTint="@color/white"
+                        android:gravity="center_vertical"
+                        android:hint="@string/check_amount"
+                        android:inputType="number"
+                        android:padding="8dp"
+                        android:textSize="30sp" />
+
+
+                </LinearLayout>
+
                 <androidx.constraintlayout.widget.Guideline
                     android:id="@+id/guideline5"
                     android:layout_width="wrap_content"
@@ -365,11 +560,11 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </LinearLayout>
-    <ImageView
-        android:id="@+id/imgBack"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        app:layout_constraintStart_toStartOf="@+id/linearLayout4"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_back" />
+<!--    <ImageView-->
+<!--        android:id="@+id/imgBack"-->
+<!--        android:layout_width="60dp"-->
+<!--        android:layout_height="60dp"-->
+<!--        app:layout_constraintStart_toStartOf="@+id/linearLayout4"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:srcCompat="@drawable/ic_back" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

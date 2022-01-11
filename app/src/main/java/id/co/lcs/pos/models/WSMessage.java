@@ -7,7 +7,7 @@ import java.util.List;
 
 
 public class WSMessage implements Serializable {
-    @SerializedName("DocNo")
+    @SerializedName("DocNo.")
     private String docNo;
     @SerializedName("Message")
     private String message;

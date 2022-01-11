@@ -37,6 +37,18 @@ public class Payment {
     private double netsAmount;
     @SerializedName("TransferReference")
     private String transNetsNo;
+    @SerializedName("CheckDate")
+    private String checkDate;
+    @SerializedName("CheckNo")
+    private int checkNo;
+    @SerializedName("CheckAmount")
+    private double checkAmount;
+    @SerializedName("CheckCountry")
+    private String checkCountry;
+    @SerializedName("CheckBank")
+    private String checkBank;
+    @SerializedName("CheckAccount")
+    private String checkAccount;
     @SerializedName("ProductInfo")
     private List<PaymentItem> productInfo;
 
@@ -174,5 +186,53 @@ public class Payment {
 
     public void setTransNetsNo(String transNetsNo) {
         this.transNetsNo = transNetsNo;
+    }
+
+    public String getCheckDate() {
+        return checkDate;
+    }
+
+    public void setCheckDate(String checkDate) {
+        this.checkDate = checkDate;
+    }
+
+    public int getCheckNo() {
+        return checkNo;
+    }
+
+    public void setCheckNo(int checkNo) {
+        this.checkNo = checkNo;
+    }
+
+    public double getCheckAmount() {
+        return checkAmount;
+    }
+
+    public void setCheckAmount(double checkAmount) {
+        this.checkAmount = checkAmount;
+    }
+
+    public String getCheckCountry() {
+        return checkCountry;
+    }
+
+    public void setCheckCountry(String checkCountry) {
+        this.checkCountry = checkCountry;
+    }
+
+    public String getCheckBank() {
+        return checkBank;
+    }
+
+    public void setCheckBank(String checkBank) {
+        this.checkBank = checkBank;
+    }
+
+    public String getCheckAccount() {
+        return checkAccount;
+    }
+
+    public void setCheckAccount(String checkAccount) {
+        this.checkAccount = checkAccount;
     }
 }

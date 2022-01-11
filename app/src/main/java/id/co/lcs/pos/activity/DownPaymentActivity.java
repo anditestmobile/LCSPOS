@@ -1,6 +1,7 @@
 package id.co.lcs.pos.activity;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -8,11 +9,15 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.RadioGroup;
+
+import com.google.gson.Gson;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 import cat.xojan.numpad.NumPadButton;
 import cat.xojan.numpad.OnNumPadClickListener;
@@ -30,8 +35,11 @@ public class DownPaymentActivity extends BaseActivity {
     private double ccAmount = 0;
     private double netsAmount = 0;
     private double cash = 0;
+    private double check = 0;
+    private boolean pCreditCard = true, pNets=false, pCash = false, pCheck=false;
     private double dpAmount = 0;
     private double totAmount = 0;
+    private Calendar myCalendar = Calendar.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +51,7 @@ public class DownPaymentActivity extends BaseActivity {
         payment = (Payment) Helper.getItemParam(Constants.PAYMENT);
         totAmount = Double.parseDouble(String.format("%.2f", payment.getDocTotal()));
         binding.edtTotAmount.setText("S$ " + String.format("%.2f", payment.getDocTotal()));
+        binding.ccRefNumber.requestFocus();
 //        binding.edtAmount.setText("S$ " + String.format("%.2f", payment.getDocTotal()));
         binding.btnProceed.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,28 +60,32 @@ public class DownPaymentActivity extends BaseActivity {
                     setToast("Amount cannot empty");
                 } else {
                     double amount = Double.parseDouble(binding.edtAmount.getText().toString().split("\\s+")[1]);
-                    ccAmount = 0;
-                    cash = 0;
                     String errorMessage = null;
-                    if (!binding.ccRefNumber.getText().toString().trim().isEmpty() && binding.cardNumber.getText().toString().trim().isEmpty()) {
-                        errorMessage = "Credit card detail cannot empty";
-                    } else if (!binding.cardNumber.getText().toString().trim().isEmpty() && binding.ccMonth.getText().toString().isEmpty()) {
-                        errorMessage = "Credit card valid month cannot empty";
-                    } else if (!binding.cardNumber.getText().toString().trim().isEmpty() && binding.ccYear.getText().toString().isEmpty()) {
-                        errorMessage = "Credit card valid year cannot empty";
-                    } else if (!binding.cardNumber.getText().toString().trim().isEmpty() && binding.ccAmount.getText().toString().isEmpty()) {
-                        errorMessage = "Credit card amount cannot empty";
-                    } else if (!binding.cardNumber.getText().toString().trim().isEmpty() && binding.ccRefNumber.getText().toString().isEmpty()) {
+                    if (ccAmount != 0 && binding.ccRefNumber.getText().toString().isEmpty()) {
                         errorMessage = "Credit card Ref No. cannot empty";
-                    } else if (!binding.edtNetsRef.getText().toString().trim().isEmpty() && binding.edtNetsAmount.getText().toString().trim().isEmpty()) {
-                        errorMessage = "Nets Amount cannot empty";
-                    } else if (!binding.edtNetsAmount.getText().toString().trim().isEmpty() && binding.edtNetsRef.getText().toString().trim().isEmpty()) {
+                    }else if (ccAmount != 0 && binding.cardNumber.getText().toString().isEmpty()) {
+                        errorMessage = "Credit card number cannot empty";
+                    } else if (ccAmount != 0 && binding.ccMonth.getText().toString().isEmpty()) {
+                        errorMessage = "Credit card valid month cannot empty";
+                    } else if (ccAmount != 0 && binding.ccYear.getText().toString().isEmpty()) {
+                        errorMessage = "Credit card valid year cannot empty";
+                    } else if (netsAmount != 0 && binding.edtNetsRef.getText().toString().trim().isEmpty()) {
                         errorMessage = "Nets Ref No. cannot empty";
-                    } else if (binding.cardNumber.getText().toString().trim().isEmpty() && binding.edtNetsAmount.getText().toString().trim().isEmpty() && binding.edtCash.getText().toString().isEmpty()) {
-                        errorMessage = "Cash cannot empty";
-                    } else if (amount < totAmount) {
-                        errorMessage = "Amount not enough";
-                    } else {
+                    }  else if (check != 0 && binding.edtCheckRef.getText().toString().trim().isEmpty()) {
+                        errorMessage = "Check No. cannot empty";
+                    } else if (check != 0 && binding.edtCheckAcc.getText().toString().trim().isEmpty()) {
+                        errorMessage = "Check Account cannot empty";
+                    } else if (check != 0 && binding.edtCheckBank.getText().toString().trim().isEmpty()) {
+                        errorMessage = "Check Bank cannot empty";
+                    } else if (check != 0 && binding.edtCheckCountry.getText().toString().trim().isEmpty()) {
+                        errorMessage = "Check Country cannot empty";
+                    } else if (check != 0 && binding.edtCheckDate.getText().toString().trim().isEmpty()) {
+                        errorMessage = "Check Date cannot empty";
+                    }
+//                    else if (amount < totAmount) {
+//                        errorMessage = "Amount not enough";
+//                    }
+                    else {
                         if (!binding.ccAmount.getText().toString().isEmpty()) {
                             ccAmount = Double.parseDouble(binding.ccAmount.getText().toString().split("\\s+")[1]);
                         }
@@ -87,15 +100,83 @@ public class DownPaymentActivity extends BaseActivity {
                                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        payment.setTransNo(binding.ccRefNumber.getText().toString());
-                                        payment.setCardNumber(binding.cardNumber.getText().toString());
-                                        payment.setcValidMonth(binding.ccMonth.getText().toString());
-                                        payment.setcValidYear(binding.ccYear.getText().toString());
-                                        payment.setCardAmount(ccAmount);
-                                        payment.setTransNetsNo(binding.edtNetsRef.getText().toString());
-                                        payment.setNetsAmount(netsAmount);
-                                        payment.setCash(cash);
-                                        payment.setDownPayment(ccAmount+netsAmount+cash);
+//                                        payment.setTransNo(binding.ccRefNumber.getText().toString());
+//                                        payment.setCardNumber(binding.cardNumber.getText().toString());
+//                                        payment.setcValidMonth(binding.ccMonth.getText().toString());
+//                                        payment.setcValidYear(binding.ccYear.getText().toString());
+//                                        payment.setCardAmount(ccAmount);
+//                                        payment.setTransNetsNo(binding.edtNetsRef.getText().toString());
+//                                        payment.setNetsAmount(netsAmount);
+//                                        payment.setCash(cash);
+//                                        payment.setDownPayment(ccAmount+netsAmount+cash);
+//                                        if(ccAmount != 0) {
+//                                            payment.setTransNo(binding.ccRefNumber.getText().toString());
+//                                            payment.setCardNumber(binding.cardNumber.getText().toString());
+//                                            payment.setcValidMonth(binding.ccMonth.getText().toString());
+//                                            payment.setcValidYear(binding.ccYear.getText().toString());
+//                                            payment.setCardAmount(ccAmount);
+//                                        }
+//                                        if(netsAmount != 0) {
+//                                            payment.setTransNetsNo(binding.edtNetsRef.getText().toString());
+//                                            payment.setNetsAmount(netsAmount);
+//                                        }
+//                                        if(cash != 0) {
+//                                            payment.setCash(cash);
+//                                        }
+//                                        if(check!=0){
+//                                            payment.setCheckNo(Integer.parseInt(binding.edtCheckRef.getText().toString()));
+//                                            payment.setCheckAccount(binding.edtCheckAcc.getText().toString());
+//                                            payment.setCheckBank(binding.edtCheckBank.getText().toString());
+//                                            payment.setCheckCountry(binding.edtCheckCountry.getText().toString());
+//                                            payment.setCheckAmount(check);
+//                                            payment.setCheckDate(binding.edtCheckDate.getText().toString());
+//                                        }
+
+                                        if(ccAmount != 0) {
+                                            payment.setTransNo(binding.ccRefNumber.getText().toString());
+                                            payment.setCardNumber(binding.cardNumber.getText().toString());
+                                            payment.setcValidMonth(binding.ccMonth.getText().toString());
+                                            payment.setcValidYear(binding.ccYear.getText().toString());
+                                            payment.setCardAmount(ccAmount);
+                                        }
+                                        else{
+                                            payment.setTransNo("");
+                                            payment.setCardNumber("");
+                                            payment.setcValidMonth("0");
+                                            payment.setcValidYear("0");
+                                            payment.setCardAmount(0);
+                                        }
+                                        if(netsAmount != 0) {
+                                            payment.setTransNetsNo(binding.edtNetsRef.getText().toString());
+                                            payment.setNetsAmount(netsAmount);
+                                        }
+                                        else{
+                                            payment.setTransNetsNo("");
+                                            payment.setNetsAmount(0);
+                                        }
+                                        if(cash != 0) {
+                                            payment.setCash(cash);
+                                        }
+                                        else{
+                                            payment.setCash(0);
+                                        }
+                                        if(check!=0){
+                                            payment.setCheckNo(Integer.parseInt(binding.edtCheckRef.getText().toString()));
+                                            payment.setCheckAccount(binding.edtCheckAcc.getText().toString());
+                                            payment.setCheckBank(binding.edtCheckBank.getText().toString());
+                                            payment.setCheckCountry(binding.edtCheckCountry.getText().toString());
+                                            payment.setCheckAmount(check);
+                                            payment.setCheckDate(binding.edtCheckDate.getText().toString());
+                                        }
+                                        else{
+                                            payment.setCheckNo(0);
+                                            payment.setCheckAccount("");
+                                            payment.setCheckBank("");
+                                            payment.setCheckCountry("");
+                                            payment.setCheckAmount(0);
+                                            payment.setCheckDate("");
+                                        }
+                                        payment.setDownPayment(ccAmount+netsAmount+cash+check);
                                         PARAM = 0;
                                         new RequestUrl().execute();
                                         getProgressDialog().show();
@@ -114,12 +195,12 @@ public class DownPaymentActivity extends BaseActivity {
             }
         });
 
-        binding.imgBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
+//        binding.imgBack.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                onBackPressed();
+//            }
+//        });
 
         binding.cardNumber.addTextChangedListener(new TextWatcher() {
             @Override
@@ -163,11 +244,11 @@ public class DownPaymentActivity extends BaseActivity {
                         binding.ccMonth.setText("");
                         setToast("Please input correct month");
                     }else{
-                        binding.ccYear.setEnabled(true);
+//                        binding.ccYear.setEnabled(true);
                         binding.ccYear.setText("");
                     }
                 }else{
-                    binding.ccYear.setEnabled(false);
+//                    binding.ccYear.setEnabled(false);
                     binding.ccYear.setText("");
                 }
             }
@@ -196,12 +277,95 @@ public class DownPaymentActivity extends BaseActivity {
             }
         });
 
+        binding.btnCreditCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                binding.ccRefNumber.requestFocus();
+                pCreditCard = true;
+                pNets = false;
+                pCash = false;
+                pCheck = false;
+                binding.lPCreditCard.setVisibility(View.VISIBLE);
+                binding.lPNets.setVisibility(View.GONE);
+                binding.lPCash.setVisibility(View.GONE);
+                binding.lPCheck.setVisibility(View.GONE);
+            }
+        });
+        binding.btnNets.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                binding.edtNetsRef.requestFocus();
+                pCreditCard = false;
+                pNets = true;
+                pCash = false;
+                pCheck = false;
+                binding.lPCreditCard.setVisibility(View.GONE);
+                binding.lPNets.setVisibility(View.VISIBLE);
+                binding.lPCash.setVisibility(View.GONE);
+                binding.lPCheck.setVisibility(View.GONE);
+            }
+        });
+        binding.btnCash.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                binding.edtCash.requestFocus();
+                pCreditCard = false;
+                pNets = false;
+                pCash = true;
+                pCheck = false;
+                binding.lPCreditCard.setVisibility(View.GONE);
+                binding.lPNets.setVisibility(View.GONE);
+                binding.lPCash.setVisibility(View.VISIBLE);
+                binding.lPCheck.setVisibility(View.GONE);
+            }
+        });
+        binding.btnCheck.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                binding.edtCheckRef.requestFocus();
+                pCreditCard = false;
+                pNets = false;
+                pCash = false;
+                pCheck = true;
+                binding.lPCreditCard.setVisibility(View.GONE);
+                binding.lPNets.setVisibility(View.GONE);
+                binding.lPCash.setVisibility(View.GONE);
+                binding.lPCheck.setVisibility(View.VISIBLE);
+            }
+        });
+
+        DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                  int dayOfMonth) {
+                // TODO Auto-generated method stub
+                myCalendar.set(Calendar.YEAR, year);
+                myCalendar.set(Calendar.MONTH, monthOfYear);
+                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                updateLabel();
+            }
+
+        };
+
+        binding.edtCheckDate.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                new DatePickerDialog(DownPaymentActivity.this, date, myCalendar
+                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
         binding.btnDot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String numEdtCCAmount = binding.ccAmount.getText().toString();
                 String numEdtCash = binding.edtCash.getText().toString();
                 String numEdtNetsAmount = binding.edtNetsAmount.getText().toString();
+                String numEdtCheckAmount = binding.edtCheckAmount.getText().toString();
                 if (binding.ccAmount.hasFocus()) {
                     if (!binding.ccAmount.getText().toString().trim().isEmpty() && !numEdtCCAmount.contains(".")) {
                         numEdtCCAmount += ".";
@@ -214,7 +378,7 @@ public class DownPaymentActivity extends BaseActivity {
                     } else {
                         ccAmount = Double.parseDouble(binding.ccAmount.getText().toString().split("\\s+")[1]);
                     }
-                    dpAmount = ccAmount + cash + netsAmount;
+                    dpAmount = ccAmount + cash + netsAmount + check;
                     binding.edtAmount.setText("S$ " + String.format("%.2f", dpAmount));
                 } else if (binding.edtNetsAmount.hasFocus()) {
                     if (!binding.edtNetsAmount.getText().toString().trim().isEmpty() && !numEdtCCAmount.contains(".")) {
@@ -228,7 +392,7 @@ public class DownPaymentActivity extends BaseActivity {
                     } else {
                         netsAmount = Double.parseDouble(binding.edtNetsAmount.getText().toString().split("\\s+")[1]);
                     }
-                    dpAmount = ccAmount + cash + netsAmount;
+                    dpAmount = ccAmount + cash + netsAmount + check;;
                     binding.edtAmount.setText("S$ " + String.format("%.2f", dpAmount));
                 } else if (binding.edtCash.hasFocus()) {
                     if (!binding.edtCash.getText().toString().trim().isEmpty() && !numEdtCash.contains(".")) {
@@ -242,7 +406,21 @@ public class DownPaymentActivity extends BaseActivity {
                     } else {
                         cash = Double.parseDouble(binding.edtCash.getText().toString().split("\\s+")[1]);
                     }
-                    dpAmount = ccAmount + cash + netsAmount;
+                    dpAmount = ccAmount + cash + netsAmount + check;;
+                    binding.edtAmount.setText("S$ " + String.format("%.2f", dpAmount));
+                }  else if (binding.edtCheckAmount.hasFocus()) {
+                    if (!binding.edtCheckAmount.getText().toString().trim().isEmpty() && !numEdtCash.contains(".")) {
+                        numEdtCheckAmount += ".";
+                        binding.edtCheckAmount.setText(numEdtCheckAmount);
+                    }
+                    int pos = binding.edtCheckAmount.getText().length();
+                    binding.edtCheckAmount.setSelection(pos);
+                    if (binding.edtCheckAmount.getText().toString().isEmpty()) {
+                        check = 0;
+                    } else {
+                        check = Double.parseDouble(binding.edtCheckAmount.getText().toString().split("\\s+")[1]);
+                    }
+                    dpAmount = ccAmount + cash + netsAmount + check;
                     binding.edtAmount.setText("S$ " + String.format("%.2f", dpAmount));
                 }
             }
@@ -258,6 +436,9 @@ public class DownPaymentActivity extends BaseActivity {
                 String numEdtNetsNo = binding.edtNetsRef.getText().toString();
                 String numEdtNetsAmount = binding.edtNetsAmount.getText().toString();
                 String numEdtCash = binding.edtCash.getText().toString();
+                String numEdtCheckAmount = binding.edtCheckAmount.getText().toString();
+                String numEdtCheckNo = binding.edtCheckRef.getText().toString();
+                String numEdtCheckAcc = binding.edtCheckAcc.getText().toString();
                 if (binding.ccRefNumber.hasFocus()) {
                     if (button.ordinal() == 10) {
                         if (!binding.ccRefNumber.getText().toString().isEmpty()) {
@@ -342,7 +523,7 @@ public class DownPaymentActivity extends BaseActivity {
                     } else {
                         ccAmount = Double.parseDouble(binding.ccAmount.getText().toString().split("\\s+")[1]);
                     }
-                    dpAmount = ccAmount + cash + netsAmount;
+                    dpAmount = ccAmount + cash + netsAmount + check;
                     binding.edtAmount.setText("S$ " + String.format("%.2f", dpAmount));
                 } else if (binding.edtNetsRef.hasFocus()) {
                     if (button.ordinal() == 10) {
@@ -386,9 +567,9 @@ public class DownPaymentActivity extends BaseActivity {
                     } else {
                         netsAmount = Double.parseDouble(binding.edtNetsAmount.getText().toString().split("\\s+")[1]);
                     }
-                    dpAmount = ccAmount + cash + netsAmount;
+                    dpAmount = ccAmount + cash + netsAmount + check;
                     binding.edtAmount.setText("S$ " + String.format("%.2f", dpAmount));
-                } else {
+                } else if (binding.edtCash.hasFocus()) {
                     if (button.ordinal() == 10) {
                         if (!binding.edtCash.getText().toString().isEmpty()) {
                             String text = binding.edtCash.getText().toString();
@@ -416,7 +597,65 @@ public class DownPaymentActivity extends BaseActivity {
                     } else {
                         cash = Double.parseDouble(binding.edtCash.getText().toString().split("\\s+")[1]);
                     }
-                    dpAmount = ccAmount + cash + netsAmount;
+                    dpAmount = ccAmount + cash + netsAmount + check;
+                    binding.edtAmount.setText("S$ " + String.format("%.2f", dpAmount));
+                } else if (binding.edtCheckRef.hasFocus()) {
+                    if (button.ordinal() == 10) {
+                        if (!binding.edtCheckRef.getText().toString().isEmpty()) {
+                            String text = binding.edtCheckRef.getText().toString();
+                            binding.edtCheckRef.setText(text.substring(0, text.length() - 1));
+                        }
+                    } else if (button.ordinal() == 11) {
+                        binding.edtCheckAcc.requestFocus();
+                    } else {
+                        numEdtCheckNo += button.ordinal();
+                        binding.edtCheckRef.setText(numEdtCheckNo);
+                    }
+                    int pos = binding.edtCheckRef.getText().length();
+                    binding.edtCheckRef.setSelection(pos);
+                }else if (binding.edtCheckAcc.hasFocus()) {
+                    if (button.ordinal() == 10) {
+                        if (!binding.edtCheckAcc.getText().toString().isEmpty()) {
+                            String text = binding.edtCheckAcc.getText().toString();
+                            binding.edtCheckAcc.setText(text.substring(0, text.length() - 1));
+                        }
+                    } else if (button.ordinal() == 11) {
+                        binding.edtCheckBank.requestFocus();
+                    } else {
+                        numEdtCheckAcc += button.ordinal();
+                        binding.edtCheckAcc.setText(numEdtCheckAcc);
+                    }
+                    int pos = binding.edtCheckAcc.getText().length();
+                    binding.edtCheckAcc.setSelection(pos);
+                } else if (binding.edtCheckAmount.hasFocus()) {
+                    if (button.ordinal() == 10) {
+                        if (!binding.edtCheckAmount.getText().toString().isEmpty()) {
+                            String text = binding.edtCheckAmount.getText().toString();
+                            if (text.substring(0, text.length() - 1).equals("S$ ")) {
+                                binding.edtCheckAmount.setText("");
+                            } else {
+                                binding.edtCheckAmount.setText(text.substring(0, text.length() - 1));
+                            }
+                        }
+                    } else if (button.ordinal() == 11) {
+                        binding.edtTotAmount.requestFocus();
+                    } else {
+                        if (binding.edtCheckAmount.getText().toString().trim().isEmpty()) {
+                            numEdtCheckAmount = "S$ " + button.ordinal();
+                            binding.edtCheckAmount.setText(numEdtCheckAmount);
+                        } else {
+                            numEdtCheckAmount += button.ordinal();
+                            binding.edtCheckAmount.setText(numEdtCheckAmount);
+                        }
+                    }
+                    int pos = binding.edtCheckAmount.getText().length();
+                    binding.edtCheckAmount.setSelection(pos);
+                    if (binding.edtCheckAmount.getText().toString().isEmpty()) {
+                        check = 0;
+                    } else {
+                        check = Double.parseDouble(binding.edtCheckAmount.getText().toString().split("\\s+")[1]);
+                    }
+                    dpAmount = ccAmount + cash + netsAmount + check;
                     binding.edtAmount.setText("S$ " + String.format("%.2f", dpAmount));
                 }
             }
@@ -489,6 +728,13 @@ public class DownPaymentActivity extends BaseActivity {
 
     }
 
+    private void updateLabel() {
+        String myFormat = "yyyy-MM-dd"; //In which you need put here
+        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+
+        binding.edtCheckDate.setText(sdf.format(myCalendar.getTime()));
+    }
+
     private class RequestUrl extends AsyncTask<Void, Void, WSMessage> {
 
         @Override
@@ -505,7 +751,8 @@ public class DownPaymentActivity extends BaseActivity {
 
                         url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_POST_SO_ARINVOICE);
                     }
-
+                    Gson gson = new Gson();
+                    String json = gson.toJson(payment);
                     return (WSMessage) Helper.postWebservice(url, payment ,WSMessage.class);
                 } else {
                     return null;
@@ -528,11 +775,21 @@ public class DownPaymentActivity extends BaseActivity {
             if (PARAM == 0) {
                 getProgressDialog().dismiss();
                 if (message != null && message.getType().equals("S")) {
-                    setToast(message.getMessage());
-                    Intent i = new Intent(DownPaymentActivity.this, MainActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
+                    new AlertDialog.Builder(DownPaymentActivity.this)
+                            .setMessage(message.getMessage() + ", " + "DocNo : " + message.getDocNo())
+                            .setCancelable(false)
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent i = new Intent(DownPaymentActivity.this, MainActivity.class);
+                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                            | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(i);
+                                    dialog.dismiss();
+                                }
+                            })
+                            .show();
+//                    setToast(message.getMessage());
                 } else {
                     if (Helper.getItemParam(Constants.INTERNAL_SERVER_ERROR) != null) {
                         setToast(Helper.getItemParam(Constants.INTERNAL_SERVER_ERROR).toString());
