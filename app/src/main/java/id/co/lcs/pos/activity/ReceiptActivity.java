@@ -6,25 +6,19 @@ package id.co.lcs.pos.activity;
 
 
 import android.Manifest;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 
 import com.nabinbhandari.android.permissions.PermissionHandler;
 import com.nabinbhandari.android.permissions.Permissions;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Objects;
 
 import id.co.lcs.pos.BuildConfig;
 import id.co.lcs.pos.constants.Constants;
@@ -34,7 +28,7 @@ import id.co.lcs.pos.service.SessionManager;
 import id.co.lcs.pos.utils.Helper;
 
 
-public class SplashActivity extends AppCompatActivity {
+public class ReceiptActivity extends AppCompatActivity {
     ActivitySplashBinding binding;
     private SessionManager session;
 
@@ -81,7 +75,7 @@ public class SplashActivity extends AppCompatActivity {
                     String mData = dataSession.get(Constants.KEY_DATA);
                     User user = (User) Helper.stringToObject(mData);
                     Helper.setItemParam(Constants.USER_DETAILS, user);
-                    Intent i = new Intent(SplashActivity.this, MainActivity.class);
+                    Intent i = new Intent(ReceiptActivity.this, MainActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
                             | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);

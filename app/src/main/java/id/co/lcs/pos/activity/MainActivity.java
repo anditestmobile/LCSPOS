@@ -6,19 +6,24 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import id.co.lcs.pos.R;
 import id.co.lcs.pos.adapter.MainAdapter;
+import id.co.lcs.pos.adapter.SerialNumberAdapter;
 import id.co.lcs.pos.constants.Constants;
 import id.co.lcs.pos.databinding.ActivityMainBinding;
 import id.co.lcs.pos.models.Customer;
+import id.co.lcs.pos.models.Employee;
 import id.co.lcs.pos.models.Payment;
 import id.co.lcs.pos.models.PaymentItem;
 import id.co.lcs.pos.models.QuotationItemResponse;
 import id.co.lcs.pos.models.QuotationResponse;
+import id.co.lcs.pos.models.SerialNumber;
 import id.co.lcs.pos.service.SessionManager;
 import id.co.lcs.pos.utils.Helper;
 import id.co.lcs.pos.utils.Utils;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -29,11 +34,13 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DecimalFormat;
@@ -43,7 +50,7 @@ import java.util.List;
 
 import static android.view.Window.FEATURE_NO_TITLE;
 
-public class MainActivity extends BaseActivity implements AdapterView.OnItemSelectedListener {
+public class MainActivity extends BaseActivity implements AdapterView.OnItemSelectedListener, SerialNumberAdapter.RecyclerViewItemClickListener {
     private MainAdapter adapter;
     private ActivityMainBinding binding;
     public int PARAM = 0;
@@ -52,15 +59,21 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
     private Dialog dialog;
     private QuotationItemResponse[] qIR;
     private Customer[] listCust;
+    private Employee[] listEmp;
+    private SerialNumber[] snArray;
+    private ArrayList<SerialNumber> listSN;
     private String scan;
     private List<QuotationItemResponse> listQIR;
+    //    private List<SerialNumber> serialNumbers;
     private List<PaymentItem> listPaymentItem;
     private Payment payment = new Payment();
     private double subTotal, disc, taxTotal, grandTotal = 0;
-    private String textCust;
+    private String textCust, textEmp, textItem, employeeName, itemName, itemCode;
     private int FLAG_CUST = 0;
     private EditText edtScan;
     private RequestUrl mAsyncTask;
+    private CustomListViewDialog customDialog;
+    private QuotationItemResponse itemTemp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,16 +90,18 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                     setToast("Customer Name cannot empty");
                 } else if (binding.txtCustCode.getText().toString().isEmpty()) {
                     setToast("Customer Code cannot empty");
+                } else if (listQIR == null) {
+                    setToast("Item cannot empty");
                 } else if (listQIR.size() == 0) {
                     setToast("Item cannot empty");
                 } else {
-                    if(binding.txtQuoNo.getText().toString().isEmpty() || binding.txtSONo.getText().toString().isEmpty()){
-                        if(binding.txtQuoNo.getText().toString().isEmpty()){
+                    if (binding.txtQuoNo.getText().toString().isEmpty() || binding.txtSONo.getText().toString().isEmpty()) {
+                        if (binding.txtQuoNo.getText().toString().isEmpty()) {
                             Helper.setItemParam(Constants.SO_FLAG, true);
-                        }else{
+                        } else {
                             Helper.setItemParam(Constants.SO_FLAG, false);
                         }
-                    }else{
+                    } else {
                         Helper.setItemParam(Constants.SO_FLAG, false);
                     }
                     payment = new Payment();
@@ -108,9 +123,9 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                         }
                     }
                     payment.setDocTotal(Double.parseDouble(String.format("%.2f", grandTotal)));
-                    if(!binding.txtQuoNo.getText().toString().isEmpty()) {
+                    if (!binding.txtQuoNo.getText().toString().isEmpty()) {
                         payment.setQuoNo(binding.txtQuoNo.getText().toString());
-                    }else{
+                    } else {
                         payment.setQuoNo(binding.txtSONo.getText().toString());
                     }
                     payment.setDocDate("2021-07-26");
@@ -118,18 +133,24 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                     for (QuotationItemResponse temp : listQIR) {
                         PaymentItem paymentItem = new PaymentItem();
                         paymentItem.setItemName(temp.getDescription());
+                        paymentItem.setUom(temp.getUom());
+                        if (temp.getIsSerialNumber().equals("Y")) {
+                            paymentItem.setSerialNumbers(temp.getSerialNumber());
+                        }
                         paymentItem.setItemCode(temp.getItemCode());
                         paymentItem.setUnitPrice(temp.getPrice());
                         paymentItem.setQty(Double.parseDouble(temp.getQty()));
-                        if(temp.getDiscMethod() == 0) {
+                        paymentItem.setUom(temp.getUom());
+                        if (temp.getDiscMethod() == 0) {
                             paymentItem.setDiscPer(temp.getDisc());
-                        }else{
+                        } else {
                             paymentItem.setDiscSum(temp.getDisc());
                         }
                         paymentItem.setLineTotal(Double.parseDouble(String.format("%.2f", temp.getPrice() * Double.parseDouble(temp.getQty()))));
                         listPaymentItem.add(paymentItem);
                     }
                     payment.setProductInfo(listPaymentItem);
+                    payment.setEmployeeName(employeeName);
                     Helper.setItemParam(Constants.PAYMENT, payment);
                     Intent intent = new Intent(getApplicationContext(), PaymentActivity.class);
                     startActivity(intent);
@@ -147,13 +168,13 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                 } else if (listQIR.size() == 0) {
                     setToast("Item cannot empty");
                 } else {
-                    if(binding.txtQuoNo.getText().toString().isEmpty() || binding.txtQuoNo.getText().toString().isEmpty()){
-                        if(binding.txtQuoNo.getText().toString().isEmpty()){
+                    if (binding.txtQuoNo.getText().toString().isEmpty() || binding.txtQuoNo.getText().toString().isEmpty()) {
+                        if (binding.txtQuoNo.getText().toString().isEmpty()) {
                             Helper.setItemParam(Constants.SO_FLAG, true);
-                        }else{
+                        } else {
                             Helper.setItemParam(Constants.SO_FLAG, false);
                         }
-                    }else{
+                    } else {
                         Helper.setItemParam(Constants.SO_FLAG, false);
                     }
                     payment = new Payment();
@@ -175,9 +196,9 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                         }
                     }
                     payment.setDocTotal(Double.parseDouble(String.format("%.2f", grandTotal)));
-                    if(!binding.txtQuoNo.getText().toString().isEmpty()) {
+                    if (!binding.txtQuoNo.getText().toString().isEmpty()) {
                         payment.setQuoNo(binding.txtQuoNo.getText().toString());
-                    }else{
+                    } else {
                         payment.setQuoNo(binding.txtSONo.getText().toString());
                     }
                     payment.setDocDate("2021-07-26");
@@ -187,6 +208,9 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                         paymentItem.setItemName(temp.getDescription());
                         paymentItem.setItemCode(temp.getItemCode());
                         paymentItem.setUnitPrice(temp.getPrice());
+                        if (temp.getIsSerialNumber().equals("Y")) {
+                            paymentItem.setSerialNumbers(temp.getSerialNumber());
+                        }
                         paymentItem.setQty(Double.parseDouble(temp.getQty()));
                         paymentItem.setDiscPer(temp.getDisc());
 //                        paymentItem.setDiscSum(temp.getNettPrice());
@@ -417,11 +441,92 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                         }
                     }
                 }
-                if (FLAG_CUST == 0 && editable.toString().length() >= 3) {
+                if (FLAG_CUST == 0) {
+//                        && editable.toString().length() >= 3) {
                     binding.txtCustCode.setText("");
                     textCust = editable.toString();
                     PARAM = 2;
                     callASyncTask();
+//                    getProgressDialog().show();
+                } else {
+                    FLAG_CUST = 0;
+                }
+            }
+        });
+
+        binding.edtEmp.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (listEmp != null && listEmp.length != 0) {
+                    for (Employee temp : listEmp) {
+                        if ((temp.getFirstName() + " " + temp.getLastName()).equals(editable.toString())) {
+                            employeeName = temp.getFirstName() + " " + temp.getLastName();
+                            FLAG_CUST = 1;
+                        }
+                    }
+                }
+                if (FLAG_CUST == 0) {
+                    textEmp = editable.toString();
+                    PARAM = 5;
+                    callASyncTask();
+//                    getProgressDialog().show();
+                } else {
+                    FLAG_CUST = 0;
+                }
+            }
+        });
+
+        binding.txtItem.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (!editable.toString().isEmpty()) {
+                    if (qIR != null && qIR.length != 0) {
+                        for (QuotationItemResponse temp : qIR) {
+                            if ((temp.getItemCode() + "\n" + temp.getDescription()).equals(editable.toString())) {
+                                if (temp.getIsSerialNumber().equals("N")) {
+                                    itemName = temp.getDescription();
+                                    setDataItem(temp);
+                                } else {
+                                    itemName = temp.getDescription();
+                                    itemCode = temp.getItemCode();
+                                    itemTemp = temp;
+                                    getProgressDialog().show();
+                                    PARAM = 6;
+                                    callASyncTask();
+                                }
+                                FLAG_CUST = 1;
+
+                            }
+                        }
+                    }
+                    if (FLAG_CUST == 0) {
+                        textItem = editable.toString();
+                        PARAM = 1;
+                        callASyncTask();
+//                    getProgressDialog().show();
+                    } else {
+                        FLAG_CUST = 0;
+                    }
                 } else {
                     FLAG_CUST = 0;
                 }
@@ -433,16 +538,16 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
             public void onClick(View view) {
                 if (!binding.txtItem.getText().toString().trim().isEmpty()) {
                     scan = binding.txtItem.getText().toString();
-                    if(!binding.txtSONo.getText().toString().isEmpty() || !binding.txtQuoNo.getText().toString().isEmpty()) {
+                    if (!binding.txtSONo.getText().toString().isEmpty() || !binding.txtQuoNo.getText().toString().isEmpty()) {
                         PARAM = 1;
                         callASyncTask();
                         getProgressDialog().show();
-                    }else{
-                        if(!binding.txtCustCode.getText().toString().isEmpty()){
+                    } else {
+                        if (!binding.txtCustCode.getText().toString().isEmpty()) {
                             PARAM = 1;
                             callASyncTask();
                             getProgressDialog().show();
-                        }else{
+                        } else {
                             setToast("Customer cannot empty");
                         }
                     }
@@ -477,8 +582,8 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
 
     }
 
-    public void callASyncTask(){
-        if(mAsyncTask != null) {
+    public void callASyncTask() {
+        if (mAsyncTask != null) {
             if (mAsyncTask.getStatus().equals(AsyncTask.Status.RUNNING)) {
                 mAsyncTask.cancel(true);
             }
@@ -613,45 +718,55 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                     if (!binding.txtQuoNo.getText().toString().trim().isEmpty()) {
                         String URL_GET_ITEM = Constants.API_PREFIX + Constants.API_GET_QUOTATION_ITEM;
                         url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_GET_ITEM)
-                                .concat(binding.txtQuoNo.getText().toString().concat("\\").concat(scan));
-                    }else if(!binding.txtSONo.getText().toString().trim().isEmpty()) {
+                                .concat(binding.txtQuoNo.getText().toString().concat("\\").concat(textItem));
+                    } else if (!binding.txtSONo.getText().toString().trim().isEmpty()) {
                         String URL_GET_ITEM = Constants.API_PREFIX + Constants.API_GET_ORDER_ITEM;
                         url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_GET_ITEM)
-                                .concat(binding.txtSONo.getText().toString().concat("\\").concat(scan));
-                    }else {
+                                .concat(binding.txtSONo.getText().toString().concat("\\").concat(textItem));
+                    } else {
                         String URL_GET_QUO_ITEM = Constants.API_PREFIX + Constants.API_GET_ITEM;
                         url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_GET_QUO_ITEM)
-                                .concat("\\").concat(scan).concat("\\").concat(binding.txtCustCode.getText().toString());
+                                .concat("\\").concat(textItem).concat("\\").concat(binding.txtCustCode.getText().toString());
                     }
                     qIR = (QuotationItemResponse[]) Helper.getWebserviceWithoutHeaders(url, QuotationItemResponse[].class);
                     return null;
-                } else if(PARAM == 2){
+                } else if (PARAM == 2) {
                     String URL_GET_CUSTOMER = Constants.API_PREFIX + Constants.API_GET_CUSTOMER;
                     final String url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_GET_CUSTOMER)
                             .concat("\\").concat(textCust);
                     listCust = (Customer[]) Helper.getWebserviceWithoutHeaders(url, Customer[].class);
                     return null;
-                }else if(PARAM == 3){
+                } else if (PARAM == 3) {
                     String URL_GET_QUOTATION = Constants.API_PREFIX + Constants.API_GET_ORDER;
 
                     final String url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_GET_QUOTATION)
                             .concat(binding.txtSONo.getText().toString());
 
                     return (QuotationResponse[]) Helper.getWebserviceWithoutHeaders(url, QuotationResponse[].class);
-                }else if(PARAM == 4) {
+                } else if (PARAM == 4) {
                     String url = "";
                     if (!binding.txtQuoNo.getText().toString().trim().isEmpty()) {
                         String URL_GET_ITEM = Constants.API_PREFIX + Constants.API_GET_QUOTATION_DETAILS;
                         url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_GET_ITEM)
                                 .concat(binding.txtQuoNo.getText().toString());
-                    }else{
+                    } else {
                         String URL_GET_ITEM = Constants.API_PREFIX + Constants.API_GET_SALES_ORDER_DETAILS;
                         url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_GET_ITEM)
                                 .concat(binding.txtSONo.getText().toString());
                     }
                     qIR = (QuotationItemResponse[]) Helper.getWebserviceWithoutHeaders(url, QuotationItemResponse[].class);
                     return null;
-                }else{
+                } else if (PARAM == 5) {
+                    String URL_GET_EMPLOYEE = Constants.API_PREFIX + Constants.API_GET_EMPLOYEE;
+                    final String url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_GET_EMPLOYEE)
+                            .concat("\\").concat(textEmp);
+                    listEmp = (Employee[]) Helper.getWebserviceWithoutHeaders(url, Employee[].class);
+                    return null;
+                } else {
+                    String URL_GET_SN = Constants.API_PREFIX + Constants.API_GET_SN;
+                    final String url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_GET_SN)
+                            .concat("\\").concat(itemCode);
+                    snArray = (SerialNumber[]) Helper.getWebserviceWithoutHeaders(url, SerialNumber[].class);
                     return null;
                 }
             } catch (Exception ex) {
@@ -686,18 +801,20 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                 }
             } else if (PARAM == 1) {
                 getProgressDialog().dismiss();
-                if (qIR.length != 0) {
-                    setDataItem(qIR);
+                if (qIR != null && qIR.length != 0) {
+//                    setDataItem(qIR);
+                    setItem(qIR);
                 } else {
                     setToast("item not found");
                 }
-            } else if(PARAM == 2) {
+            } else if (PARAM == 2) {
+                getProgressDialog().dismiss();
                 if (listCust != null && listCust.length != 0) {
                     setCustomer(listCust);
                 } else {
 //                    setToast("customer not found");
                 }
-            }else if(PARAM == 3){
+            } else if (PARAM == 3) {
                 getProgressDialog().dismiss();
                 if (quotation != null && quotation.length != 0) {
                     listCust = new Customer[1];
@@ -713,14 +830,69 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
                         Toast.makeText(getApplicationContext(), "Data not found", Toast.LENGTH_SHORT).show();
                     }
                 }
-            }else if(PARAM == 4){
+            } else if (PARAM == 4) {
                 getProgressDialog().dismiss();
-                if (qIR!=null && qIR.length != 0) {
-                    setDataItem(qIR);
+                if (qIR != null && qIR.length != 0) {
+                    setDataItemQuotation(qIR);
+                }
+            } else if (PARAM == 5) {
+                getProgressDialog().dismiss();
+                if (listEmp != null && listEmp.length != 0) {
+                    setEmployee(listEmp);
+                } else {
+//                    setToast("customer not found");
+                }
+            } else {
+                getProgressDialog().dismiss();
+                if (snArray != null && snArray.length != 0) {
+                    showDialogSN(snArray);
+                } else {
+                    setToast("Serial Number not found/No Stock");
                 }
             }
         }
 
+    }
+
+    private void showDialogSN(SerialNumber[] snArray) {
+        listSN = new ArrayList<>();
+
+        for (SerialNumber sn : snArray) {
+            int FLAG = 0;
+            if(listQIR != null && listQIR.size() != 0) {
+                for (QuotationItemResponse temp : listQIR) {
+                    if(temp.getSerialNumber() != null && temp.getSerialNumber().size() != 0){
+                        if (sn.getSysSerial().equals(temp.getSerialNumber().get(0).getSysSerial())
+                                && sn.getSerialNumber().equals(temp.getSerialNumber().get(0).getSerialNumber())) {
+                            FLAG = 1;
+                            break;
+                        }
+                    }
+                }
+                if (FLAG == 0) {
+                    listSN.add(sn);
+                }
+            }else{
+                listSN.add(sn);
+            }
+        }
+        SerialNumberAdapter dataAdapter = new SerialNumberAdapter(listSN, this);
+        customDialog = new CustomListViewDialog(MainActivity.this, dataAdapter);
+
+        customDialog.show();
+        customDialog.setCanceledOnTouchOutside(false);
+    }
+
+    @Override
+    public void clickOnItem(SerialNumber data) {
+//        clickButton.setText(data);
+        List<SerialNumber> serialNumbers = new ArrayList<>();
+        serialNumbers.add(data);
+        itemTemp.setSerialNumber(serialNumbers);
+        setDataItem(itemTemp);
+        if (customDialog != null) {
+            customDialog.dismiss();
+        }
     }
 
     private void getItem() {
@@ -731,7 +903,6 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
 
     private void setCustomer(Customer[] listCust) {
         String[] cust = new String[listCust.length];
-        ;
         for (int i = 0; i < listCust.length; i++) {
             cust[i] = listCust[i].getCustName();
         }
@@ -742,13 +913,101 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
         binding.txtCustName.showDropDown();
     }
 
-    private void setDataItem(QuotationItemResponse[] item) {
+    private void setEmployee(Employee[] listEmp) {
+        String[] emp = new String[listEmp.length];
+        for (int i = 0; i < listEmp.length; i++) {
+            emp[i] = listEmp[i].getFirstName() + " " + listEmp[i].getLastName();
+        }
+
+        ArrayAdapter adapter = new
+                ArrayAdapter(this, R.layout.list_customer, R.id.item, emp);
+        binding.edtEmp.setAdapter(adapter);
+        binding.edtEmp.showDropDown();
+    }
+
+    private void setItem(QuotationItemResponse[] item) {
+        String[] itm = new String[item.length];
+        for (int i = 0; i < item.length; i++) {
+            itm[i] = item[i].getItemCode() + "\n" + item[i].getDescription();
+        }
+
+        ArrayAdapter adapter = new
+                ArrayAdapter(this, R.layout.list_customer, R.id.item, itm);
+        binding.txtItem.setAdapter(adapter);
+        binding.txtItem.showDropDown();
+    }
+
+    private void setDataItem(QuotationItemResponse item) {
 //        binding.txtItem.clearFocus();
-        double disc = item[0].getPrice() * item[0].getDisc()/100;
-        double nettPrice = item[0].getPrice() - disc;
+        double disc = item.getPrice() * item.getDisc() / 100;
+        double nettPrice = item.getDiscPrice();
+        double totPrice = nettPrice * Integer.parseInt(item.getQty());
+        item.setTotPrice(Double.parseDouble(String.format("%.2f", totPrice)));
+        item.setNettPrice(Double.parseDouble(String.format("%.2f", nettPrice)));
+        if (listQIR != null && listQIR.size() != 0) {
+            int FLAG = 0;
+            for (QuotationItemResponse temp : listQIR) {
+                if (temp.getIsSerialNumber().equals("N")) {
+                    if (temp.getItemCode().equals(item.getItemCode())) {
+                        temp.setQty(String.valueOf(Double.parseDouble(temp.getQty()) + Double.parseDouble(item.getQty())));
+                        FLAG = 1;
+                        break;
+                    } else {
+                        continue;
+                    }
+                } else {
+                    if (temp.getItemCode().equals(item.getItemCode())
+                            && temp.getSerialNumber().get(0).getSerialNumber().equals(item.getSerialNumber().get(0).getSerialNumber())) {
+                        temp.setQty(String.valueOf(Double.parseDouble(temp.getQty()) + Double.parseDouble(item.getQty())));
+                        FLAG = 1;
+                        break;
+                    } else {
+                        continue;
+                    }
+                }
+            }
+            if (FLAG == 0) {
+                listQIR.add(item);
+            }
+            adapter.filterList(listQIR);
+        } else {
+//            if(listQIR == null) {
+            listQIR = new ArrayList<>();
+//                for (QuotationItemResponse q : item) {
+            listQIR.add(item);
+//                }
+            adapter = new MainAdapter(MainActivity.this, listQIR);
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
+
+            binding.rcItem.setLayoutManager(layoutManager);
+
+            binding.rcItem.setAdapter(adapter);
+//            }else{
+//                for (QuotationItemResponse q : item) {
+//                    listQIR.add(q);
+//                }
+//                adapter.filterList(listQIR);
+//            }
+        }
+        countData(listQIR);
+
+//        final Handler handler = new Handler();
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+        binding.txtItem.requestFocus();
+//            }
+//        }, 2000);
+        binding.txtItem.dismissDropDown();
+    }
+
+    private void setDataItemQuotation(QuotationItemResponse[] item) {
+//        binding.txtItem.clearFocus();
+        double disc = item[0].getPrice() * item[0].getDisc() / 100;
+        double nettPrice = item[0].getDiscPrice();
         double totPrice = nettPrice * Integer.parseInt(item[0].getQty());
-        item[0].setTotPrice(Double.parseDouble(String.format("%.2f",totPrice)));
-        item[0].setNettPrice(Double.parseDouble(String.format("%.2f",nettPrice)));
+        item[0].setTotPrice(Double.parseDouble(String.format("%.2f", totPrice)));
+        item[0].setNettPrice(Double.parseDouble(String.format("%.2f", nettPrice)));
         if (listQIR != null && listQIR.size() != 0) {
             int FLAG = 0;
             for (QuotationItemResponse temp : listQIR) {
@@ -766,16 +1025,16 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
             adapter.filterList(listQIR);
         } else {
 //            if(listQIR == null) {
-                listQIR = new ArrayList<>();
-                for (QuotationItemResponse q : item) {
-                    listQIR.add(q);
-                }
-                adapter = new MainAdapter(MainActivity.this, listQIR);
-                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
+            listQIR = new ArrayList<>();
+            for (QuotationItemResponse q : item) {
+                listQIR.add(q);
+            }
+            adapter = new MainAdapter(MainActivity.this, listQIR);
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
 
-                binding.rcItem.setLayoutManager(layoutManager);
+            binding.rcItem.setLayoutManager(layoutManager);
 
-                binding.rcItem.setAdapter(adapter);
+            binding.rcItem.setAdapter(adapter);
 //            }else{
 //                for (QuotationItemResponse q : item) {
 //                    listQIR.add(q);
@@ -789,7 +1048,7 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
 //        handler.postDelayed(new Runnable() {
 //            @Override
 //            public void run() {
-                binding.txtItem.requestFocus();
+        binding.txtItem.requestFocus();
 //            }
 //        }, 2000);
     }
@@ -811,7 +1070,7 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
             if (binding.spinner.getSelectedItemPosition() == 0) {
                 if (binding.txtDisc.getText().toString().trim().isEmpty() || binding.txtDisc.getText().toString().trim().equals("-")) {
                     disc = subTotal * (0 / 100);
-                }else {
+                } else {
                     disc = subTotal * (Double.parseDouble(binding.txtDisc.getText().toString()) / 100);
                 }
             } else {
@@ -843,3 +1102,4 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemSele
         // TODO Auto-generated method stub
     }
 }
+

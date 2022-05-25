@@ -2,28 +2,44 @@ package id.co.lcs.pos.activity;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.print.PrintAttributes;
+import android.print.PrintDocumentAdapter;
+import android.print.PrintManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.RadioGroup;
+import android.widget.Toast;
+
+import androidx.core.content.FileProvider;
 
 import com.google.gson.Gson;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Objects;
 
 import cat.xojan.numpad.NumPadButton;
 import cat.xojan.numpad.OnNumPadClickListener;
+import id.co.lcs.pos.BuildConfig;
+import id.co.lcs.pos.adapter.PdfDocumentAdapter;
 import id.co.lcs.pos.constants.Constants;
 import id.co.lcs.pos.databinding.ActivityDownPaymentBinding;
 import id.co.lcs.pos.databinding.ActivityPaymentBinding;
+import id.co.lcs.pos.models.Invoice;
 import id.co.lcs.pos.models.Payment;
 import id.co.lcs.pos.models.WSMessage;
 import id.co.lcs.pos.utils.Helper;
@@ -40,6 +56,9 @@ public class DownPaymentActivity extends BaseActivity {
     private double dpAmount = 0;
     private double totAmount = 0;
     private Calendar myCalendar = Calendar.getInstance();
+    private String docNumber, msg;
+    private Invoice invoice = new Invoice();
+    private int openInv = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,13 +90,13 @@ public class DownPaymentActivity extends BaseActivity {
                         errorMessage = "Credit card valid year cannot empty";
                     } else if (netsAmount != 0 && binding.edtNetsRef.getText().toString().trim().isEmpty()) {
                         errorMessage = "Nets Ref No. cannot empty";
-                    }  else if (check != 0 && binding.edtCheckRef.getText().toString().trim().isEmpty()) {
-                        errorMessage = "Check No. cannot empty";
-                    } else if (check != 0 && binding.edtCheckAcc.getText().toString().trim().isEmpty()) {
-                        errorMessage = "Check Account cannot empty";
-                    } else if (check != 0 && binding.edtCheckBank.getText().toString().trim().isEmpty()) {
-                        errorMessage = "Check Bank cannot empty";
-                    } else if (check != 0 && binding.edtCheckCountry.getText().toString().trim().isEmpty()) {
+//                    }  else if (check != 0 && binding.edtCheckRef.getText().toString().trim().isEmpty()) {
+//                        errorMessage = "Check No. cannot empty";
+//                    } else if (check != 0 && binding.edtCheckAcc.getText().toString().trim().isEmpty()) {
+//                        errorMessage = "Check Account cannot empty";
+//                    } else if (check != 0 && binding.edtCheckBank.getText().toString().trim().isEmpty()) {
+//                        errorMessage = "Check Bank cannot empty";
+                    } else if (check != 0 && binding.edtRef.getText().toString().trim().isEmpty()) {
                         errorMessage = "Check Country cannot empty";
                     } else if (check != 0 && binding.edtCheckDate.getText().toString().trim().isEmpty()) {
                         errorMessage = "Check Date cannot empty";
@@ -164,7 +183,7 @@ public class DownPaymentActivity extends BaseActivity {
                                             payment.setCheckNo(Integer.parseInt(binding.edtCheckRef.getText().toString()));
                                             payment.setCheckAccount(binding.edtCheckAcc.getText().toString());
                                             payment.setCheckBank(binding.edtCheckBank.getText().toString());
-                                            payment.setCheckCountry(binding.edtCheckCountry.getText().toString());
+                                            payment.setCheckCountry(binding.edtRef.getText().toString());
                                             payment.setCheckAmount(check);
                                             payment.setCheckDate(binding.edtCheckDate.getText().toString());
                                         }
@@ -755,6 +774,10 @@ public class DownPaymentActivity extends BaseActivity {
                     String json = gson.toJson(payment);
                     return (WSMessage) Helper.postWebservice(url, payment ,WSMessage.class);
                 } else {
+                    String URL_GET_RECEIPT = Constants.API_PREFIX + Constants.API_GET_RECEIPT;
+
+                    String url = Helper.getItemParam(Constants.BASE_URL).toString().concat(URL_GET_RECEIPT).concat("\\").concat(docNumber);
+                    invoice = (Invoice) Helper.getWebserviceWithoutHeaders(url, Invoice.class);
                     return null;
                 }
             } catch (Exception ex) {
@@ -781,19 +804,17 @@ public class DownPaymentActivity extends BaseActivity {
                             .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    Intent i = new Intent(DownPaymentActivity.this, MainActivity.class);
-                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                            | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    startActivity(i);
-                                    dialog.dismiss();
+                                    docNumber = message.getDocNo();
+                                    msg = message.getMessage();
+                                    PARAM = 1;
+                                    new RequestUrl().execute();
+                                    getProgressDialog().show();
                                 }
                             })
                             .show();
 //                    setToast(message.getMessage());
                 } else {
-                    if (Helper.getItemParam(Constants.INTERNAL_SERVER_ERROR) != null) {
-                        setToast(Helper.getItemParam(Constants.INTERNAL_SERVER_ERROR).toString());
-                    } else {
+                    if (message != null && message.getType().equals("E")) {
                         new AlertDialog.Builder(DownPaymentActivity.this)
                                 .setMessage(message.getMessage())
                                 .setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
@@ -803,12 +824,135 @@ public class DownPaymentActivity extends BaseActivity {
                                     }
                                 })
                                 .show();
-//                        setToast(message.getMessage());
+                    }else{
+                        setToast(Helper.getItemParam(Constants.INTERNAL_SERVER_ERROR).toString());
                     }
                 }
             }else{
+                if(invoice != null && invoice.getInvoice() != null) {
+                    if(!invoice.getInvoice().isEmpty()) {
+                        printPDF();
+                    }else{
+                        setToast("No Invoice was found");
+                    }
+                }else{
+                    setToast("No Invoice was found");
+                }
             }
         }
 
     }
+
+    private void openPDF() {
+        FileOutputStream fos = null;
+        try {
+            if (invoice.getInvoice() != null) {
+//                fos = new FileOutputStream(new File(storageDir.getAbsolutePath() + "/" +  docNumber + ".pdf"));
+                fos = openFileOutput(docNumber + ".pdf", Context.MODE_PRIVATE);
+                byte[] decodedString = android.util.Base64.decode(invoice.getInvoice(), android.util.Base64.DEFAULT);
+                fos.write(decodedString);
+                fos.flush();
+                fos.close();
+            }
+
+        } catch (Exception e) {
+
+        } finally {
+            if (fos != null) {
+                fos = null;
+            }
+        }
+        File pdfFile = new File("/data/data/" + getPackageName() + "/files/" + docNumber + ".pdf");
+        Uri path = FileProvider.getUriForFile(Objects.requireNonNull(getApplicationContext()),
+                BuildConfig.APPLICATION_ID + ".fileprovider", pdfFile);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        intent.setDataAndType(path, "application/pdf");
+        try {
+            openInv = 1;
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(DownPaymentActivity.this,
+                    "No Application Available to View PDF",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    private void printPDF() {
+        FileOutputStream fos = null;
+        try {
+            if (invoice.getInvoice() != null) {
+//                fos = new FileOutputStream(new File(storageDir.getAbsolutePath() + "/" +  docNumber + ".pdf"));
+                fos = openFileOutput(docNumber + ".pdf", Context.MODE_PRIVATE);
+                byte[] decodedString = android.util.Base64.decode(invoice.getInvoice(), android.util.Base64.DEFAULT);
+                fos.write(decodedString);
+                fos.flush();
+                fos.close();
+            }
+
+        } catch (Exception e) {
+
+        } finally {
+            if (fos != null) {
+                fos = null;
+            }
+        }
+        openInv = 1;
+        File pdfFile = new File("/data/data/" + getPackageName() + "/files/" + docNumber + ".pdf");
+        Uri path = FileProvider.getUriForFile(Objects.requireNonNull(getApplicationContext()),
+                BuildConfig.APPLICATION_ID + ".fileprovider", pdfFile);
+        PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
+        try {
+            PrintDocumentAdapter printAdapter = new PdfDocumentAdapter(getApplicationContext(), pdfFile.getAbsolutePath());
+            printManager.print("Document", printAdapter, new PrintAttributes.Builder().build());
+
+        } catch (Exception e) {
+            Log.e(getClass().getSimpleName(), "Exception printing PDF", e);
+        }
+//        Intent intent = new Intent(Intent.ACTION_VIEW);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+//        intent.setDataAndType(path, "application/pdf");
+//        try {
+//            openInv = 1;
+//            startActivity(intent);
+//        } catch (ActivityNotFoundException e) {
+//            Toast.makeText(PaymentActivity.this,
+//                    "No Application Available to View PDF",
+//                    Toast.LENGTH_SHORT).show();
+//        }
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (openInv == 1) {
+            new AlertDialog.Builder(DownPaymentActivity.this)
+                    .setMessage(msg + ", " + "DocNo : " + docNumber)
+                    .setCancelable(false)
+                    .setPositiveButton("Reprint Invoice", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            getProgressDialog().dismiss();
+                            printPDF();
+                        }
+                    })
+                    .setNegativeButton("Done", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent i = new Intent(DownPaymentActivity.this, MainActivity.class);
+                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(i);
+                        }
+                    })
+                    .show();
+        }
+    }
+
+
 }

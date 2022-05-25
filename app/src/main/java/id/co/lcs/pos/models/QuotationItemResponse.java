@@ -3,6 +3,7 @@ package id.co.lcs.pos.models;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class QuotationItemResponse implements Serializable {
     @SerializedName("Description")
@@ -17,10 +18,17 @@ public class QuotationItemResponse implements Serializable {
     private String qty;
     @SerializedName("Discount")
     private double disc;
+    @SerializedName("IsPriceChange")
+    private int isPriceChange;
+    @SerializedName("IsSerialNumber")
+    private String isSerialNumber;
+    @SerializedName("UOM")
+    private String uom;
 
     private transient int discMethod;
     private transient double totPrice;
     private transient double nettPrice;
+    private transient List<SerialNumber> serialNumber;
 
     public String getDescription() {
         return description;
@@ -92,5 +100,37 @@ public class QuotationItemResponse implements Serializable {
 
     public void setDiscPrice(double discPrice) {
         this.discPrice = discPrice;
+    }
+
+    public int getIsPriceChange() {
+        return isPriceChange;
+    }
+
+    public void setIsPriceChange(int isPriceChange) {
+        this.isPriceChange = isPriceChange;
+    }
+
+    public String getIsSerialNumber() {
+        return isSerialNumber;
+    }
+
+    public void setIsSerialNumber(String isSerialNumber) {
+        this.isSerialNumber = isSerialNumber;
+    }
+
+    public List<SerialNumber> getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(List<SerialNumber> serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    public String getUom() {
+        return uom;
+    }
+
+    public void setUom(String uom) {
+        this.uom = uom;
     }
 }

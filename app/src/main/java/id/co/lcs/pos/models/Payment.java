@@ -49,6 +49,8 @@ public class Payment {
     private String checkBank;
     @SerializedName("CheckAccount")
     private String checkAccount;
+    @SerializedName("EmployeeName")
+    private String employeeName;
     @SerializedName("ProductInfo")
     private List<PaymentItem> productInfo;
 
@@ -234,5 +236,13 @@ public class Payment {
 
     public void setCheckAccount(String checkAccount) {
         this.checkAccount = checkAccount;
+    }
+
+    public String getEmployeeName() {
+        return employeeName;
+    }
+
+    public void setEmployeeName(String employeeName) {
+        this.employeeName = employeeName;
     }
 }

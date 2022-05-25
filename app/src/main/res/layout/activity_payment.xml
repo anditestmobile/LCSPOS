@@ -274,6 +274,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
                     android:orientation="vertical"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toTopOf="@+id/btnProceed"
                     app:layout_constraintEnd_toStartOf="@+id/guideline5"
                     app:layout_constraintStart_toStartOf="parent"
@@ -465,7 +466,6 @@
                     android:layout_marginRight="10dp"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
-                    android:visibility="gone"
                     app:layout_constraintBottom_toTopOf="@+id/btnProceed"
                     app:layout_constraintEnd_toStartOf="@+id/guideline5"
                     app:layout_constraintStart_toStartOf="parent"
@@ -527,7 +527,7 @@
                             android:textSize="30sp"
                             android:layout_marginRight="5dp"/>
                         <EditText
-                            android:id="@+id/edtCheckCountry"
+                            android:id="@+id/edtRef"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:background="@drawable/edt_background"
@@ -535,7 +535,7 @@
                             android:layout_weight="5"
                             android:inputType="text"
                             android:imeOptions="actionNext"
-                            android:hint="@string/check_country"
+                            android:hint="@string/refrence"
                             android:layout_marginTop="10dp"
                             android:padding="8dp"
                             android:textSize="30sp"/>

@@ -3,6 +3,7 @@ package id.co.lcs.pos.models;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.List;
 
 
 public class PaymentItem implements Serializable {
@@ -20,6 +21,10 @@ public class PaymentItem implements Serializable {
     private double discSum;
     @SerializedName("LineTotal")
     private double lineTotal;
+    @SerializedName("UOM")
+    private String uom;
+    @SerializedName("SerialNumbers")
+    private List<SerialNumber> serialNumbers;
 
     public String getItemCode() {
         return itemCode;
@@ -75,5 +80,21 @@ public class PaymentItem implements Serializable {
 
     public void setDiscSum(double discSum) {
         this.discSum = discSum;
+    }
+
+    public List<SerialNumber> getSerialNumbers() {
+        return serialNumbers;
+    }
+
+    public void setSerialNumbers(List<SerialNumber> serialNumbers) {
+        this.serialNumbers = serialNumbers;
+    }
+
+    public String getUom() {
+        return uom;
+    }
+
+    public void setUom(String uom) {
+        this.uom = uom;
     }
 }

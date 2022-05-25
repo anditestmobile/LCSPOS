@@ -26,8 +26,11 @@ public class Constants {
     public static final String API_GET_ORDER = "GET_OrderDocument\\";
     public static final String API_POST_SO_ARINVOICE = "POST_SO_ARInvoice";
     public static final String API_POST_ARINVOICE = "POST_ARInvoice";
+    public static final String API_GET_RECEIPT = "POS_Print\\";
     public static final String API_GET_ITEM = "GET_Item\\";
     public static final String API_GET_CUSTOMER = "GET_CustomerDetails\\";
+    public static final String API_GET_EMPLOYEE = "GET_EmployeeMasterData\\";
+    public static final String API_GET_SN = "GET_SerialNumberDetails\\";
     public static final String API_LOGIN = "POST_Login";
 
 //    public static final String BASE_URL = "http://58.185.191.42:6868";

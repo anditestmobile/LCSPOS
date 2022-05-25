@@ -18,7 +18,7 @@
     <string name="check_number">Key in Check No.</string>
     <string name="check_date">Key in Check Date</string>
     <string name="check_bank">Check Bank</string>
-    <string name="check_country">Check Country</string>
+    <string name="refrence">Reference</string>
 
 
     <string name="login_msg_empty_username">Please fill the username</string>
