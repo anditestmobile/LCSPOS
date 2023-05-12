@@ -1,48 +1,76 @@
 package id.co.lcs.pos.activity;
 
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION;
+
+import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
-import android.print.PrintAttributes;
-import android.print.PrintDocumentAdapter;
-import android.print.PrintManager;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
+import com.starmicronics.stario.PortInfo;
+import com.starmicronics.stario.StarIOPort;
+import com.starmicronics.stario.StarIOPortException;
+import com.starmicronics.starioextension.StarIoExt;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 import cat.xojan.numpad.NumPadButton;
 import cat.xojan.numpad.OnNumPadClickListener;
 import id.co.lcs.pos.BuildConfig;
-import id.co.lcs.pos.adapter.PdfDocumentAdapter;
+import id.co.lcs.pos.R;
+import id.co.lcs.pos.adapter.DialogDownPaymentAdapter;
+import id.co.lcs.pos.adapter.DialogPaymentAdapter;
 import id.co.lcs.pos.constants.Constants;
 import id.co.lcs.pos.databinding.ActivityDownPaymentBinding;
-import id.co.lcs.pos.databinding.ActivityPaymentBinding;
 import id.co.lcs.pos.models.Invoice;
 import id.co.lcs.pos.models.Payment;
 import id.co.lcs.pos.models.WSMessage;
+import id.co.lcs.pos.printer.Communication;
+import id.co.lcs.pos.printer.ILocalizeReceipts;
+import id.co.lcs.pos.printer.ModelCapability;
+import id.co.lcs.pos.printer.PrinterFunctions;
+import id.co.lcs.pos.printer.PrinterSettingConstant;
+import id.co.lcs.pos.printer.PrinterSettingManager;
+import id.co.lcs.pos.printer.PrinterSettings;
 import id.co.lcs.pos.utils.Helper;
+import id.co.lcs.pos.utils.Utils;
 
 public class DownPaymentActivity extends BaseActivity {
     private ActivityDownPaymentBinding binding;
@@ -60,6 +88,29 @@ public class DownPaymentActivity extends BaseActivity {
     private Invoice invoice = new Invoice();
     private int openInv = 0;
 
+    private static final int BLUETOOTH_REQUEST_CODE = 1000;
+    private int mPrinterSettingIndex = 0;
+    PrinterSettingManager settingManager = null;
+    PrinterSettings settings = null;
+    private List<PortInfo> mPortList;
+    public static Dialog dialog;
+    private int       mModelIndex;
+    private String    mPortName;
+    private String    mPortSettings;
+    private String    mMacAddress;
+    private String    mModelName;
+    private Boolean   mDrawerOpenStatus;
+    private int       mPaperSize;
+    private Button btnPrint;
+    private ProgressDialog mProgressDialog;
+    // Static CONSTANT VALUE
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static final String[] PERMISSION_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            WRITE_EXTERNAL_STORAGE,
+    };
+    private Bitmap mBitmap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,10 +118,27 @@ public class DownPaymentActivity extends BaseActivity {
         View view = binding.getRoot();
         setContentView(view);
         init();
+        if (Build.VERSION_CODES.S <= SDK_INT) {
+            requestBluetoothPermission();
+        }
+        verifyStoragePermission(this);
+        mProgressDialog = new ProgressDialog(this);
+
+        mProgressDialog.setMessage("Communicating...");
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgressDialog.setCancelable(false);
         payment = (Payment) Helper.getItemParam(Constants.PAYMENT);
         totAmount = Double.parseDouble(String.format("%.2f", payment.getDocTotal()));
         binding.edtTotAmount.setText("S$ " + String.format("%.2f", payment.getDocTotal()));
         binding.ccRefNumber.requestFocus();
+
+        binding.imgPrinter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SearchTask searchTask = new SearchTask();
+                searchTask.execute("BT:");
+            }
+        });
 //        binding.edtAmount.setText("S$ " + String.format("%.2f", payment.getDocTotal()));
         binding.btnProceed.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -208,7 +276,9 @@ public class DownPaymentActivity extends BaseActivity {
                                 })
                                 .show();
                     }
-                    setToast(errorMessage);
+                    if(errorMessage != null) {
+                        setToast(errorMessage);
+                    }
 
                 }
             }
@@ -901,16 +971,17 @@ public class DownPaymentActivity extends BaseActivity {
         }
         openInv = 1;
         File pdfFile = new File("/data/data/" + getPackageName() + "/files/" + docNumber + ".pdf");
-        Uri path = FileProvider.getUriForFile(Objects.requireNonNull(getApplicationContext()),
-                BuildConfig.APPLICATION_ID + ".fileprovider", pdfFile);
-        PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
-        try {
-            PrintDocumentAdapter printAdapter = new PdfDocumentAdapter(getApplicationContext(), pdfFile.getAbsolutePath());
-            printManager.print("Document", printAdapter, new PrintAttributes.Builder().build());
-
-        } catch (Exception e) {
-            Log.e(getClass().getSimpleName(), "Exception printing PDF", e);
-        }
+        print(pdfFile);
+//        Uri path = FileProvider.getUriForFile(Objects.requireNonNull(getApplicationContext()),
+//                BuildConfig.APPLICATION_ID + ".fileprovider", pdfFile);
+//        PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
+//        try {
+//            PrintDocumentAdapter printAdapter = new PdfDocumentAdapter(getApplicationContext(), pdfFile.getAbsolutePath());
+//            printManager.print("Document", printAdapter, new PrintAttributes.Builder().build());
+//
+//        } catch (Exception e) {
+//            Log.e(getClass().getSimpleName(), "Exception printing PDF", e);
+//        }
 //        Intent intent = new Intent(Intent.ACTION_VIEW);
 //        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 //        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
@@ -954,5 +1025,172 @@ public class DownPaymentActivity extends BaseActivity {
         }
     }
 
+    @RequiresApi(31)
+    private void requestBluetoothPermission() {
+        if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_DENIED ||
+                checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_DENIED) {
+            requestPermissions(
+                    new String[]{
+                            Manifest.permission.BLUETOOTH_CONNECT,
+                            Manifest.permission.BLUETOOTH_SCAN,
+                    },
+                    BLUETOOTH_REQUEST_CODE
+            );
+        }
+    }
+
+    public void verifyStoragePermission(Activity activity) {
+        int permission = ActivityCompat.checkSelfPermission(activity, WRITE_EXTERNAL_STORAGE);
+
+        // Surrounded with if statement for Android R to get access of complete file.
+        if (SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager() && permission != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        activity,
+                        PERMISSION_STORAGE,
+                        REQUEST_EXTERNAL_STORAGE);
+
+                // Abruptly we will ask for permission once the application is launched for sake demo.
+                Intent intent = new Intent();
+                intent.setAction(ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                Uri uri = Uri.fromParts("package", this.getPackageName(), null);
+                intent.setData(uri);
+                startActivity(intent);
+            }
+        }
+    }
+
+    private class SearchTask extends AsyncTask<String, Void, Void> {
+
+        SearchTask() {
+            super();
+        }
+
+        @Override
+        protected Void doInBackground(String... interfaceType) {
+            try {
+                mPortList = StarIOPort.searchPrinter(interfaceType[0], getApplicationContext());
+            } catch (StarIOPortException | SecurityException e) {
+                mPortList = new ArrayList<>();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void doNotUse) {
+//            for (PortInfo info : mPortList) {
+            showDialogArticle();
+//                addItem(info);
+//            }
+        }
+    }
+
+    public void showDialogArticle() {
+        dialog = new Dialog(DownPaymentActivity.this);
+        // dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.dialog_article);
+
+        TextView btndialog = dialog.findViewById(R.id.btnCancel);
+        btndialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                dialog.dismiss();
+            }
+        });
+
+        RecyclerView recyclerView = dialog.findViewById(R.id.rcArticle);
+        DialogDownPaymentAdapter adapter = new DialogDownPaymentAdapter(DownPaymentActivity.this, mPortList);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
+
+        dialog.show();
+    }
+
+    public void setDataFromDialog(PortInfo listInfo) {
+        for(PortInfo info : mPortList){
+            if(info.getModelName().equals(listInfo.getModelName())
+                    && info.getPortName().equals(listInfo.getPortName())
+                    && info.getMacAddress().equals(listInfo.getMacAddress())){
+                mModelName = info.getPortName().substring(PrinterSettingConstant.IF_TYPE_BLUETOOTH.length());
+                mPortName = "BT:" + info.getMacAddress();
+                mMacAddress = info.getMacAddress();
+                mPaperSize = 576;
+                mModelIndex = 21;
+                mPortSettings = "";
+                mDrawerOpenStatus = true;
+                break;
+            }
+        }
+        registerPrinter();
+    }
+
+    public void registerPrinter() {
+        PrinterSettingManager settingManager = new PrinterSettingManager(getApplicationContext());
+
+        settingManager.storePrinterSettings(
+                mPrinterSettingIndex,
+                new PrinterSettings(mModelIndex, mPortName, mPortSettings, mMacAddress, mModelName, mDrawerOpenStatus, mPaperSize)
+        );
+    }
+
+    private void print(File file){
+        mProgressDialog.show();
+
+
+        PrinterSettingManager settingManager = new PrinterSettingManager(this);
+        PrinterSettings       settings       = settingManager.getPrinterSettings();
+
+        StarIoExt.Emulation emulation = ModelCapability.getEmulation(settings.getModelIndex());
+        int paperSize = settings.getPaperSize();
+        ILocalizeReceipts localizeReceipts = ILocalizeReceipts.createLocalizeReceipts(0, paperSize);
+
+//        File file = new File(this.getFilesDir() + "/document.pdf");
+        byte[] commands;
+        mBitmap = Utils.pdfToBitmap(file, this);
+        if (mBitmap != null) {
+            commands = PrinterFunctions.createRasterData(emulation, mBitmap, paperSize, true);
+        }
+        else {
+            commands = new byte[0];
+        }
+        Communication.sendCommands(this, commands, settings.getPortName(), settings.getPortSettings()
+                , 10000, 30000, getApplicationContext(), mCallback);
+
+    }
+
+    private final Communication.SendCallback mCallback = new Communication.SendCallback() {
+        @Override
+        public void onStatus(Communication.CommunicationResult communicationResult) {
+            if (mProgressDialog != null) {
+                mProgressDialog.dismiss();
+                if (openInv == 1) {
+                    new AlertDialog.Builder(DownPaymentActivity.this)
+                            .setMessage(msg + ", " + "DocNo : " + docNumber)
+                            .setCancelable(false)
+                            .setPositiveButton("Reprint Invoice", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    getProgressDialog().dismiss();
+                                    printPDF();
+                                }
+                            })
+                            .setNegativeButton("Done", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent i = new Intent(DownPaymentActivity.this, MainActivity.class);
+                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                            | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(i);
+                                }
+                            })
+                            .show();
+                }
+            }
+        }
+    };
 
 }

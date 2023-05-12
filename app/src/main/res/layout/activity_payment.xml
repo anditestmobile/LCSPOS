@@ -6,6 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".activity.PaymentActivity">
 
+    <ImageView
+        android:id="@+id/imgPrinter"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        app:tint="@color/colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/print_setting" />
+
     <LinearLayout
         android:id="@+id/linearLayout4"
         android:layout_width="1100dp"
@@ -23,6 +34,8 @@
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
+
+
 
             <TextView
                 android:id="@+id/textView1"
